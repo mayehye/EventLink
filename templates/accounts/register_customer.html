@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .custom-card {
+        border-radius: 24px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+        border: none;
+        overflow: hidden;
+    }
+    .form-control-custom {
+        background-color: #F8F9FA;
+        border: 2px solid transparent;
+        border-radius: 12px;
+        padding: 14px 20px;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+    .form-control-custom:focus {
+        background-color: white;
+        border-color: var(--primary-green);
+        box-shadow: 0 0 0 4px rgba(10, 77, 60, 0.1);
+        outline: none;
+    }
+    .form-label-custom {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+</style>
+
+<div class="container py-5 d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="card custom-card w-100" style="max-width: 550px;">
+        
+        <!-- Header -->
+        <div class="text-center p-5" style="background-color: #F8F9FA; border-bottom: 1px solid #EAEAEA;">
+            <h2 class="fw-bold mb-2" style="font-family: 'Merriweather', serif; color: var(--primary-green);">Create an Account</h2>
+            <p class="mb-0 text-muted">Sign up to buy tickets and save your favorite events.</p>
+        </div>
+        
+        <div class="p-4 p-md-5">
+            
+            <!-- THE "SELL TICKETS" TOGGLE -->
+            <div class="alert mb-4 text-center" style="background-color: rgba(255, 179, 0, 0.15); border-radius: 12px; border: 1px solid rgba(255, 179, 0, 0.3);">
+                <span class="text-dark me-2">Want to sell tickets?</span> 
+                <a href="{% url 'accounts:register_organizer' %}" class="fw-bold text-decoration-none" style="color: #b37d00;">
+                    Become an Organizer <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="row g-3 mb-4">
+                    {% for field in form %}
+                        <div class="col-12">
+                            <label class="form-label-custom">{{ field.label }}</label>
+                            <input type="{{ field.field.widget.input_type }}" name="{{ field.html_name }}" class="form-control form-control-custom w-100" required>
+                 
+                            {% for error in field.errors %}
+                                <small class="text-danger fw-bold d-block mt-2"><i class="bi bi-exclamation-circle"></i> {{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <button type="submit" class="btn btn-lg w-100 fw-bold shadow-sm py-3" style="background-color: var(--primary-green); color: white; border-radius: 12px; font-size: 1.1rem;">
+                    Sign Up
+                </button>
+            </form>
+            
+            <div class="text-center mt-4 pt-4 border-top">
+                <span class="text-muted">Already have an account?</span> 
+                <a href="{% url 'accounts:login' %}" class="fw-bold text-decoration-none" style="color: var(--primary-green);">Log In</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5 d-flex justify-content-center align-items-center" style="min-height: 75vh;">
+    <div class="card border-0 shadow-lg p-0" style="border-radius: 20px; max-width: 600px; width: 100%; overflow: hidden;">
+        
+        <!-- Header -->
+        <div class="bg-light p-4 text-center border-bottom">
+            <h3 class="fw-bold mb-1" style="color: var(--primary-green); font-family: 'Merriweather', serif;">Checkout</h3>
+            <p class="text-muted mb-0">Complete your ticket purchase securely.</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-danger alert-dismissible fade show rounded-3 small m-3" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="p-4 p-md-5 text-center">
+            
+            <!-- Event Info -->
+            <h4 class="fw-bold mb-2">{{ event.title }}</h4>
+            <p class="text-muted mb-4"><i class="bi bi-calendar-event me-2"></i>{{ event.date|date:"D, M j, Y" }} at {{ event.start_time|time:"g:i A" }}</p>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="mb-4 text-start">
+                    <label class="form-label fw-bold">Select Ticket Option / Table</label>
+                    <div class="row g-3">
+                        
+                        <!-- 1. Standard Admission Option (Displayed if event has a base ticket price) -->
+                        {% if event.ticket_price and event.ticket_price > 0 %}
+                        <div class="col-12">
+                            <div class="p-3 border rounded-3 position-relative">
+                                <div class="form-check">
+                                    <input class="form-check-input tier-radio" type="radio" name="tier_id" id="standard_ticket" value="" data-price="{{ event.ticket_price }}" required {% if not ticket_tiers or forloop.first %}checked{% endif %}>
+                                    <label class="form-check-label w-100" for="standard_ticket">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="fw-bold fs-5">Standard</span>
+                                            <span class="text-success fw-bold">GH₵ {{ event.ticket_price }}</span>
+                                        </div>
+                                        <p class="text-muted small mt-1 mb-0">General entry ticket</p>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- 2. Custom Tiers / Tables Options (Displayed if created) -->
+                        {% for tier in ticket_tiers %}
+                        <div class="col-12">
+                            <div class="p-3 border rounded-3 position-relative">
+                                <div class="form-check">
+                                    <input class="form-check-input tier-radio" type="radio" name="tier_id" id="tier_{{ tier.id }}" value="{{ tier.id }}" data-price="{{ tier.price }}" required {% if not event.ticket_price and forloop.first %}checked{% endif %}>
+                                    <label class="form-check-label w-100" for="tier_{{ tier.id }}">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="fw-bold fs-5">{{ tier.name }}</span>
+                                            <span class="text-success fw-bold">GH₵ {{ tier.price }}</span>
+                                        </div>
+                                        {% if tier.description %}
+                                            <p class="text-muted small mt-1 mb-1">{{ tier.description }}</p>
+                                        {% endif %}
+                                        <span class="badge bg-light text-secondary border">{{ tier.quantity_available }} available</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                    </div>
+                </div>
+
+                <div class="mb-4 text-start">
+                    <label for="quantity" class="form-label fw-bold">Quantity</label>
+                    <input type="number" name="quantity" id="quantity" class="form-control form-control-lg" value="1" min="1" max="50" required>
+                </div>
+
+                <!-- Total Price Display Box -->
+                <div class="p-3 bg-light rounded-3 mb-4 d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-muted">Total Amount:</span>
+                    <h3 class="fw-bold text-success mb-0">GH₵ <span id="totalPriceDisplay">0.00</span></h3>
+                </div>
+
+                <button type="submit" class="btn btn-lg w-100 text-white fw-bold shadow-sm" style="background-color: var(--primary-green); border-radius: 12px; padding: 14px;" id="payBtn">
+                    Proceed to Payment
+                </button>
+            </form>
+            
+            <div class="mt-4">
+                <a href="{% url 'events:event_detail' event.id %}" class="text-decoration-none text-muted small fw-bold">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Event
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript to handle dynamic calculation -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const quantityInput = document.getElementById('quantity');
+        const totalPriceDisplay = document.getElementById('totalPriceDisplay');
+        const tierRadios = document.querySelectorAll('.tier-radio');
+
+        function calculateTotal() {
+            let unitPrice = 0.00;
+            const selectedRadio = document.querySelector('.tier-radio:checked');
+            if (selectedRadio) {
+                unitPrice = parseFloat(selectedRadio.getAttribute('data-price')) || 0.00;
+            }
+
+            const qty = parseInt(quantityInput.value) || 1;
+            const total = (unitPrice * qty).toFixed(2);
+            totalPriceDisplay.textContent = total;
+        }
+
+        if (quantityInput) {
+            quantityInput.addEventListener('input', calculateTotal);
+            quantityInput.addEventListener('change', calculateTotal);
+        }
+
+        tierRadios.forEach(radio => {
+            radio.addEventListener('change', calculateTotal);
+        });
+
+        calculateTotal();
+    });
+</script>
+{% endblock %}

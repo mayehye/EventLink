@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; color: #333;">
+    
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; border: 1px solid #ddd;">
+        
+        <!-- Header -->
+        <div style="background-color: #198754; padding: 20px; text-align: center; color: white;">
+            <h1 style="margin: 0; font-size: 24px;">Your Tickets Are Ready!</h1>
+        </div>
+
+        <!-- Event Details -->
+        <div style="padding: 30px;">
+            <h2 style="margin-top: 0;">{{ event.title }}</h2>
+            <p style="margin: 5px 0; color: #666;"><strong>Date:</strong> {{ event.date|date:"l, F j, Y" }}</p>
+            <p style="margin: 5px 0 20px 0; color: #666;"><strong>Time:</strong> {{ event.start_time|time:"g:i A" }}</p>
+            
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+            <h3 style="margin-bottom: 15px;">Your Unique Ticket Codes:</h3>
+            
+            <!-- Loop through and display each QR Code -->
+            {% for ticket in tickets %}
+                <div style="text-align: center; margin-bottom: 25px; padding: 15px; background-color: #f8f9fa; border-radius: 8px;">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ ticket.ticket_id }}" alt="QR Code" style="margin-bottom: 10px;">
+                    <br>
+                    <strong style="font-size: 18px; letter-spacing: 2px;">{{ ticket.ticket_id }}</strong>
+                </div>
+            {% endfor %}
+
+            <p style="font-size: 14px; color: #888; text-align: center; margin-top: 30px;">
+                Please present this email (or the QR codes above) at the gate for scanning.
+            </p>
+        </div>
+    </div>
+
+</body>
+</html>

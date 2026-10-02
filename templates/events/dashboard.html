@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    
+    <!-- Header Section with Organizer Brand & Verification Status -->
+    <div class="mb-5 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+            <!-- Unverified Warning Banner -->
+            {% if organizer.verification_status != 'Verified' %}
+                <div class="alert alert-danger py-2 px-3 small fw-bold mb-2 shadow-sm d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.85rem; border-left: 4px solid #dc3545;">
+                    <i class="bi bi-exclamation-triangle-fill me-2 text-danger fs-5"></i> 
+                    <span>Account unverified. Please contact admin to get verified and avoid spam flagging.</span>
+                </div>
+            {% endif %}
+
+            <!-- Organizer Name with Verified Badge -->
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <h5 class="fw-bold mb-0 text-secondary text-uppercase" style="letter-spacing: 0.5px; font-size: 0.95rem;">
+                    {{ organizer.organization_name|default:request.user.username }}
+                </h5>
+                
+                {% if organizer.verification_status == 'Verified' %}
+                    <span class="d-inline-flex align-items-center justify-content-center text-white" style="width: 20px; height: 20px; background-color: #0866FF; border-radius: 50%; font-size: 11px;" title="Verified Organizer">
+                        <i class="bi bi-check" style="line-height: 1; font-weight: 900;"></i>
+                    </span>
+                    <span class="fw-bold" style="font-size: 0.75rem; color: #0866FF !important;">Verified</span>
+                {% endif %}
+            </div>
+            
+            <h2 class="fw-bold mb-0" style="color: var(--primary-green); font-family: 'Merriweather', serif;">Organizer Dashboard</h2>
+        </div>
+        
+        <!-- Action Buttons on the Top Right (Row Layout) -->
+        <div class="d-flex flex-wrap gap-2">
+           <a href="{% url 'accounts:request_payout' %}" class="btn text-white fw-bold py-2 px-4 shadow-sm" style="background-color: var(--primary-green); border-radius: 10px;">
+                <i class="bi bi-wallet2 me-2"></i> Request Withdrawal
+            </a>
+            <a href="{% url 'accounts:payout_settings' %}" class="btn text-white fw-bold py-2 px-3 shadow-sm" style="background-color: var(--primary-green); border-radius: 8px;">
+                Payout Settings
+            </a>
+            <a href="{% url 'events:create_event' %}" class="btn text-white fw-bold py-2 px-3 shadow-sm" style="background-color: var(--primary-green); border-radius: 8px;">
+                <i class="bi bi-plus-lg me-1"></i> Create Event
+            </a>
+        </div>
+    </div>
+
+    <!-- Events Listing Grid -->
+    <div class="row">
+        {% for event in events %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 16px; overflow: hidden;">
+                
+                <!-- Event Poster Thumbnail -->
+                {% if event.image %}
+                    <img src="{{ event.image.url }}" alt="Event Poster" class="card-img-top" style="height: 180px; object-fit: cover;">
+                {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center text-muted" style="height: 180px;">
+                        <i class="bi bi-image fs-1"></i>
+                    </div>
+                {% endif %}
+
+                <div class="card-body p-4 d-flex flex-column">
+                    <h4 class="fw-bold mb-2">{{ event.title }}</h4>
+                    <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill me-1"></i> {{ event.location }}</p>
+                    <p class="text-muted small mb-4"><i class="bi bi-calendar-event me-1"></i> {{ event.date|date:"M d, Y" }} at {{ event.start_time|time:"g:i A" }}</p>
+
+                    <!-- Action Buttons (Edit, Delete, Scan, and Send Message/Announcement) -->
+                    <div class="mt-auto d-flex flex-column gap-2">
+                        <div class="d-flex gap-2">
+                            <!-- Edit Button -->
+                            <a href="{% url 'events:edit_event' event.id %}" class="btn text-white btn-sm fw-bold w-100 shadow-sm" style="background-color: var(--primary-green); border-radius: 8px;">
+                                <i class="bi bi-pencil me-1"></i> Edit
+                            </a>
+                            
+                            <!-- Delete Button Trigger Modal -->
+                            <button type="button" class="btn btn-outline-danger btn-sm fw-bold w-100" style="border-radius: 8px;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ event.id }}">
+                                <i class="bi bi-trash-fill me-1"></i> Delete
+                            </button>
+                        </div>
+                        
+                        <!-- Scan Tickets Button -->
+                        <a href="{% url 'events:manage_event' event.id %}" class="btn btn-sm text-white fw-bold w-100 shadow-sm" style="background-color: var(--primary-green); border-radius: 8px;">
+                            <i class="bi bi-qr-code-scan me-1"></i> Scan Tickets
+                        </a>
+
+                        <!-- Send Message / Broadcast Announcement Button (Placed directly under Scan Tickets) -->
+                        <a href="{% url 'events:broadcast_message' event.id %}" class="btn btn-sm btn-light border fw-bold w-100 text-dark shadow-sm d-flex align-items-center justify-content-center" style="border-radius: 8px;">
+                            <i class="bi bi-megaphone-fill text-success me-2"></i> Send Message to Attendees
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Styled Delete Confirmation Modal (Placed outside card flow) -->
+        <div class="modal fade" id="deleteModal{{ event.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ event.id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                    <div class="modal-body text-center p-4">
+                        <div class="mb-3">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger rounded-circle" style="width: 60px; height: 60px;">
+                                <i class="bi bi-exclamation-triangle-fill fs-2"></i>
+                            </div>
+                        </div>
+                        
+                        <h4 class="fw-bold mb-2" style="font-family: 'Merriweather', serif;">Delete Event?</h4>
+                        <p class="text-muted small mb-4">
+                            Are you sure you want to delete <strong class="text-dark">"{{ event.title }}"</strong>? This action cannot be undone and will remove all associated ticket data.
+                        </p>
+
+                        <div class="d-flex gap-2 justify-content-center">
+                            <button type="button" class="btn btn-light fw-bold px-4 py-2" data-bs-dismiss="modal" style="border-radius: 8px;">Cancel</button>
+                            
+                            <form action="{% url 'events:delete_event' event.id %}" method="POST" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger fw-bold px-4 py-2 shadow-sm" style="border-radius: 8px;">
+                                    <i class="bi bi-trash-fill me-1"></i> Yes, Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% empty %}
+        <!-- Empty State -->
+        <div class="col-12 text-center py-5">
+            <div class="d-inline-block p-4 bg-light rounded-circle mb-3 text-muted">
+                <i class="bi bi-calendar-x fs-1"></i>
+            </div>
+            <h4 class="fw-bold">No events created yet</h4>
+            <p class="text-muted mb-4">Publish your first event to start selling tickets and tracking check-ins.</p>
+            <a href="{% url 'events:create_event' %}" class="btn btn-lg text-white fw-bold px-5" style="background-color: var(--primary-green); border-radius: 12px;">Create Event Now</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Admin Contact & Verification Support Widget -->
+    <div class="card border-0 shadow-sm p-4 mt-5 bg-light" style="border-radius: 16px;">
+        <div class="row align-items-center">
+            <div class="col-lg-8 mb-3 mb-lg-0">
+                <h6 class="fw-bold text-uppercase text-secondary small mb-1">
+                    <i class="bi bi-headset me-1"></i> Need Administrator Assistance?
+                </h6>
+                <p class="text-muted small mb-0">
+                    To verify your organizer account, remove spam warnings, and unlock full platform privileges, reach out to our administration team directly:
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end d-flex flex-column flex-sm-row justify-content-lg-end gap-2">
+                <a href="mailto:{{ admin_email }}" class="btn text-white btn-sm fw-bold px-3 py-2 shadow-sm" style="background-color: var(--primary-green); border-radius: 8px;">
+                    <i class="bi bi-envelope-fill me-1"></i> Email Admin
+                </a>
+                <a href="https://wa.me/{{ +233554113254 }}?text=Hello%20Admin,%20I%20would%20like%20to%20verify%20my%20EventLink%20organizer%20account." target="_blank" class="btn btn-sm text-white fw-bold px-3 py-2 shadow-sm" style="background-color: var(--primary-green); border-radius: 8px;">
+                    <i class="bi bi-whatsapp me-1"></i> WhatsApp Admin
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

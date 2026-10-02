@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold" style="color: var(--primary-green); font-family: 'Merriweather', serif;">My Tickets</h2>
+        <p class="text-muted">Present your QR code at the venue for scanning.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        {% for ticket in tickets %}
+        <div class="col-lg-8 col-md-10 mb-5">
+            <div class="card border-0 shadow" style="border-radius: 16px; overflow: hidden;">
+                <div class="row g-0">
+                    
+                    <!-- Left Side: Event Details -->
+                    <div class="col-md-8 p-4 bg-white position-relative d-flex flex-column justify-content-between">
+                        <div>
+                            <!-- Header with Image & Title -->
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="d-flex align-items-center gap-3" style="min-width: 0;">
+                                    {% if ticket.event.image %}
+                                        <img src="{{ ticket.event.image.url }}" alt="Event Poster" class="shadow-sm" style="width: 60px; height: 60px; object-fit: cover; border-radius: 10px; flex-shrink: 0;">
+                                    {% endif %}
+                                    <h4 class="fw-bold mb-0" style="line-height: 1.3; text-wrap: wrap;">{{ ticket.event.title }}</h4>
+                                </div>
+                                
+                                <!-- Ticket Status Badge -->
+                                <div class="d-flex align-items-center">
+                                    {% if ticket.is_used %}
+                                        <span class="badge bg-secondary px-3 py-2 ms-3" style="border-radius: 8px; flex-shrink: 0;">Used</span>
+                                    {% else %}
+                                        <span class="badge px-3 py-2 text-white ms-3" style="background-color: var(--primary-green); border-radius: 8px; flex-shrink: 0;">Valid</span>
+                                        <a href="{% url 'events:download_ticket' ticket.id %}" class="btn btn-sm fw-bold text-white px-3 ms-2" style="background-color: var(--primary-green); border-radius: 8px; height: 32px; display: inline-flex; align-items: center;">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            {% if ticket.is_used %}
+                                <div class="mb-3 text-end">
+                                    <a href="{% url 'events:delete_ticket' ticket.ticket_id %}" class="btn btn-outline-danger btn-sm fw-bold" style="border-radius: 8px;" onclick="return confirm('Remove this scanned ticket from your history?');">
+                                        <i class="bi bi-trash3-fill me-1"></i> Remove Ticket
+                                    </a>
+                                </div>
+                            {% endif %}
+                            
+                            <p class="text-muted mb-3"><i class="bi bi-geo-alt-fill me-1"></i> {{ ticket.event.location }}</p>
+                            
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <p class="text-muted small text-uppercase mb-0 fw-bold">Date</p>
+                                    <p class="fw-bold mb-0">{{ ticket.event.date|date:"M d, Y" }}</p>
+                                </div>
+                                <div class="col-6">
+                                    <p class="text-muted small text-uppercase mb-0 fw-bold">Time</p>
+                                    <p class="fw-bold mb-0">{{ ticket.event.start_time|time:"g:i A"|default:"TBA" }}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <p class="text-muted small text-uppercase mb-0 fw-bold">Order Ref</p>
+                                    <p class="fw-bold text-muted mb-0 small" style="font-family: monospace;">{{ ticket.order_reference }}</p>
+                                </div>
+                                <div class="col-6">
+                                    <p class="text-muted small text-uppercase mb-0 fw-bold">Total Price</p>
+                                    <p class="fw-bold mb-0">GH₵ {{ ticket.total_price }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ticket Card Action Area: Organizer Updates / Announcement Button -->
+                        <div class="pt-3 border-top d-flex justify-content-between align-items-center mt-2">
+                            <span class="small text-muted"><i class="bi bi-ticket-detailed me-1"></i> Ticket ID: {{ ticket.ticket_id }}</span>
+                            
+                            <!-- Announcement / Message Button -->
+                            <a href="{% url 'events:event_announcements' ticket.event.id %}" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-bold position-relative">
+                                <i class="bi bi-bell-fill me-1"></i> Organizer Updates
+                                {% if ticket.event.announcements.count > 0 %}
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        {{ ticket.event.announcements.count }}
+                                    </span>
+                                {% endif %}
+                            </a>
+                        </div>
+                        
+                        <!-- DESKTOP Perforated Edge Effect (Vertical Dashed Line) -->
+                        <div class="d-none d-md-block position-absolute end-0 top-0 bottom-0" style="border-right: 3px dashed #e9ecef;"></div>
+                    </div>
+
+                    <!-- Right Side: QR Code Area -->
+                    <div class="col-md-4 p-4 d-flex flex-column align-items-center justify-content-center text-center position-relative" style="background-color: #f8f9fa;">
+                        
+                        <!-- MOBILE Perforated Edge Effect (Horizontal Dashed Line across the top) -->
+                        <div class="d-md-none position-absolute start-0 end-0 top-0" style="border-top: 3px dashed #dee2e6;"></div>
+                        
+                        <!-- High-Res QR Code API Generation -->
+                        <div class="bg-white p-3 rounded-4 shadow-sm mb-3 mt-2">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={{ ticket.ticket_id }}" alt="Ticket QR Code" class="img-fluid" style="max-width: 180px; width: 100%; opacity: {% if ticket.is_used %}0.2{% else %}1{% endif %};">
+                        </div>
+                        
+                        <p class="text-muted small text-uppercase mb-1 fw-bold">Scan Code</p>
+                        <p class="fw-bold mb-0 text-dark" style="letter-spacing: 1px; font-family: monospace; font-size: 1.1rem;">{{ ticket.ticket_id }}</p>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% empty %}
+        
+        <!-- Empty State -->
+        <div class="col-12 text-center py-5">
+            <div class="d-inline-block p-4 bg-light rounded-circle mb-3 text-muted">
+                <i class="bi bi-ticket-perforated fs-1"></i>
+            </div>
+            <h4 class="fw-bold">No tickets yet</h4>
+            <p class="text-muted mb-4">When you purchase tickets, they will securely appear here.</p>
+            <a href="{% url 'events:home' %}" class="btn btn-lg text-white fw-bold px-5" style="background-color: var(--primary-green); border-radius: 12px;">Browse Events</a>
+        </div>
+        
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

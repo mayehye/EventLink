@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5 position-relative" style="z-index: 10;">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            
+            <div class="text-center mb-4">
+                <div class="d-inline-block p-3 bg-white rounded-circle mb-3 shadow-sm">
+                    <i class="bi bi-pencil-square fs-2" style="color: var(--primary-green);"></i>
+                </div>
+                <h3 class="fw-bold mb-1" style="color: var(--primary-green); font-family: 'Merriweather', serif;">Edit Event Details</h3>
+                <p class="text-muted">Update your event information and ticket tiers below.</p>
+            </div>
+
+            <div class="card border-0 shadow-sm p-4 p-md-5" style="border-radius: 16px;">
+                
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    {% if form.errors %}
+                        <div class="alert alert-danger shadow-sm fw-bold small" style="border-radius: 8px;">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> Please correct the errors below.
+                        </div>
+                    {% endif %}
+
+                    <!-- Event Info Fields -->
+                    {% for field in form %}
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-muted small text-uppercase">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <div class="form-text small mt-1">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% if field.errors %}
+                                <div class="text-danger small mt-1 fw-bold">{{ field.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    <hr class="my-5">
+
+                    <!-- TICKET TIERS / TABLES SECTION -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h4 class="fw-bold mb-1" style="color: var(--primary-green);"><i class="bi bi-ticket-perforated me-2"></i>Ticket Tiers & Tables</h4>
+                                <p class="text-muted small mb-0">Modify existing tiers or add new tables.</p>
+                            </div>
+                            <button type="button" class="btn btn-sm text-white fw-bold px-3" style="background-color: var(--primary-green); border-radius: 8px;" id="addTierBtn">
+                                <i class="bi bi-plus-lg me-1"></i> Add Table / Tier
+                            </button>
+                        </div>
+
+                        <div id="tiersContainer">
+                            {% for tier in event.ticket_tiers.all %}
+                            <div class="tier-row card p-3 border shadow-sm mb-3 position-relative" style="border-radius: 12px; background-color: #fcfcfc;">
+                                <input type="hidden" name="tier_id[]" value="{{ tier.id }}">
+                                <div class="row g-3">
+                                    <div class="col-md-5">
+                                        <label class="form-label small fw-bold text-muted">Table / Tier Name</label>
+                                        <input type="text" name="tier_name[]" class="form-control" value="{{ tier.name }}" required>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold text-muted">Price (GH₵)</label>
+                                        <input type="number" step="0.01" name="tier_price[]" class="form-control" value="{{ tier.price }}" min="0" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold text-muted">Quantity Available</label>
+                                        <input type="number" name="tier_quantity[]" class="form-control" value="{{ tier.quantity_available }}" min="1" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label small fw-bold text-muted">Description / Perks</label>
+                                        <textarea name="tier_description[]" class="form-control" rows="2">{{ tier.description }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mt-5 d-flex gap-3">
+                        <a href="{% url 'events:dashboard' %}" class="btn btn-light btn-lg fw-bold w-100 shadow-sm" style="border-radius: 12px;">Cancel</a>
+                        <button type="submit" class="btn btn-lg w-100 text-white fw-bold shadow-sm" style="background-color: var(--primary-green); border-radius: 12px;">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript to dynamically add new rows -->
+<script>
+    document.getElementById('addTierBtn').addEventListener('click', function() {
+        const container = document.getElementById('tiersContainer');
+        
+        const newRow = document.createElement('div');
+        newRow.className = 'tier-row card p-3 border shadow-sm mb-3 position-relative';
+        newRow.style.borderRadius = '12px';
+        newRow.style.backgroundColor = '#fcfcfc';
+        
+        newRow.innerHTML = `
+            <input type="hidden" name="tier_id[]" value="">
+            <button type="button" class="btn-close position-absolute top-0 end-0 m-3 removeTierBtn" aria-label="Close"></button>
+            <div class="row g-3">
+                <div class="col-md-5">
+                    <label class="form-label small fw-bold text-muted">Table / Tier Name</label>
+                    <input type="text" name="tier_name[]" class="form-control" placeholder="e.g., VIP, Odogu Seat" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted">Price (GH₵)</label>
+                    <input type="number" step="0.01" name="tier_price[]" class="form-control" value="50.00" min="0" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold text-muted">Quantity Available</label>
+                    <input type="number" name="tier_quantity[]" class="form-control" value="50" min="1" required>
+                </div>
+                <div class="col-12">
+                    <label class="form-label small fw-bold text-muted">Description / Perks</label>
+                    <textarea name="tier_description[]" class="form-control" rows="2" placeholder="Describe perks..."></textarea>
+                </div>
+            </div>
+        `;
+        
+        container.appendChild(newRow);
+
+        newRow.querySelector('.removeTierBtn').addEventListener('click', function() {
+            newRow.remove();
+        });
+    });
+</script>
+{% endblock %}

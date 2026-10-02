@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .custom-card {
+        border-radius: 24px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+        border: none;
+        overflow: hidden;
+    }
+    .form-control-custom {
+        background-color: #F8F9FA;
+        border: 2px solid transparent;
+        border-radius: 12px;
+        padding: 14px 20px;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+    .form-control-custom:focus {
+        background-color: white;
+        border-color: var(--primary-green);
+        box-shadow: 0 0 0 4px rgba(10, 77, 60, 0.1);
+        outline: none;
+    }
+    .form-label-custom {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+    .step-badge {
+        background-color: #E8F5E9;
+        color: var(--primary-green);
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 10px;
+    }
+</style>
+
+<div class="container py-5 d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="card custom-card w-100" style="max-width: 650px;">
+        
+        <!-- Header -->
+        <div class="text-center text-white p-5" style="background-color: var(--primary-green);">
+            <h2 class="fw-bold mb-2" style="font-family: 'Merriweather', serif;">Become an Organizer</h2>
+            <p class="mb-0" style="opacity: 0.9;">Join EventLink and start selling tickets today.</p>
+        </div>
+        
+        <div class="p-4 p-md-5">
+            <form method="POST">
+                {% csrf_token %}
+                
+                <!-- Account Details Section -->
+                <div class="d-flex align-items-center mb-4">
+                    <span class="step-badge">1</span>
+                    <h5 class="fw-bold mb-0">Account Details</h5>
+                </div>
+                
+                <div class="row g-3 mb-5">
+                    {% for field in form %}
+                        <div class="col-12">
+                            <label class="form-label-custom">{{ field.label }}</label>
+                            
+                            <!-- We render the input manually to apply our custom CSS -->
+                            <input type="{{ field.field.widget.input_type }}" name="{{ field.html_name }}" class="form-control form-control-custom w-100" required>
+                            
+                            <!-- Display errors if any (e.g. Passwords don't match) -->
+                            {% for error in field.errors %}
+                                <small class="text-danger fw-bold d-block mt-2"><i class="bi bi-exclamation-circle"></i> {{ error }}</small>
+                            {% endfor %}
+                            
+                            <!-- Intentionally leaving out field.help_text to keep the UI clean! -->
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Brand Details Section -->
+                <div class="d-flex align-items-center mb-4">
+                    <span class="step-badge">2</span>
+                    <h5 class="fw-bold mb-0">Brand & Contact</h5>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label-custom">Organization / Brand Name</label>
+                    <input type="text" name="organization_name" class="form-control form-control-custom w-100" placeholder="e.g. DANNY BARBER Events" required>
+                </div>
+                
+               <div class="mb-5">
+                    <label class="form-label-custom">Phone Number <span class="text-muted fw-normal">(For Ticket Sales)</span></label>
+                    <input type="tel" name="phone_number" class="form-control form-control-custom w-100" 
+                           placeholder="e.g. 0241234567" 
+                           required 
+                           inputmode="numeric" 
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '')" 
+                           maxlength="15">
+                </div>
+                
+                <button type="submit" class="btn btn-lg w-100 fw-bold shadow-sm py-3" style="background-color: var(--accent-orange); color: #1A1A1A; border-radius: 12px; font-size: 1.1rem;">
+                    Create My Account
+                </button>
+            </form>
+            
+            <div class="text-center mt-4 pt-4 border-top">
+                <span class="text-muted">Already have an account?</span> 
+                <a href="{% url 'accounts:login' %}" class="fw-bold text-decoration-none" style="color: var(--primary-green);">Log In</a>
+            </div>
+        </div>
+
+        <div class="p-4 p-md-5">
+            
+            <!-- ADD THIS BANNER -->
+            <div class="alert mb-4 text-center" style="background-color: rgba(10, 77, 60, 0.08); border-radius: 12px; border: 1px solid rgba(10, 77, 60, 0.1);">
+                <span class="text-dark me-2">Just looking to buy tickets?</span> 
+                <a href="{% url 'accounts:register' %}" class="fw-bold text-decoration-none" style="color: var(--primary-green);">
+                    Sign up as a Customer <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+            
+            <form method="POST">
+
+    </div>
+</div>
+{% endblock %}

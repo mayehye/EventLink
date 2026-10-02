@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+                <div class="card-body p-4">
+                    <h3 class="fw-bold mb-4">Profile Settings</h3>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">First Name</label>
+                            <input type="text" name="first_name" class="form-control" value="{{ request.user.first_name }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Last Name</label>
+                            <input type="text" name="last_name" class="form-control" value="{{ request.user.last_name }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Email Address</label>
+                            <input type="email" name="email" class="form-control" value="{{ request.user.email }}" required>
+                        </div>
+
+                        {% if organizer %}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Phone Number</label>
+                            <input type="text" name="phone_number" class="form-control" value="{{ organizer.phone_number }}">
+                        </div>
+                        {% endif %}
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn text-white fw-bold py-2" style="background-color: var(--primary-green); border-radius: 8px;">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

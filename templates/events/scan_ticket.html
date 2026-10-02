@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Include the HTML5 QR Code Scanner Library -->
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+<div class="container py-5 d-flex justify-content-center">
+    <div class="card border-0 shadow-lg p-4 p-md-5 w-100" style="max-width: 650px; border-radius: 20px;">
+        
+        <div class="text-center mb-4">
+            <h3 class="fw-bold" style="font-family: 'Merriweather', serif;">{{ event.title }}</h3>
+            <p class="text-muted small mb-3">Manage gate check-ins or scan QR codes at the door.</p>
+            
+            <!-- Live Revenue & Scanned Badges -->
+            <div class="d-inline-flex flex-wrap gap-2 justify-content-center">
+                <span class="badge bg-light text-dark border px-3 py-2 rounded-pill fw-bold">
+                    <i class="bi bi-cash-stack text-success me-1"></i> Total Revenue: GH₵ {{ total_sold_amount|default:0|floatformat:2 }}
+                </span>
+                <span class="badge bg-light text-dark border px-3 py-2 rounded-pill fw-bold">
+                    <i class="bi bi-check-circle-fill text-primary me-1"></i> Scanned: {{ total_scanned|default:0 }}
+                </span>
+            </div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-3 small" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% if message %}
+            <div class="alert alert-{{ status }} text-center fw-bold shadow-sm mb-4" style="border-radius: 12px; font-size: 1.1rem;">
+                {% if status == 'success' %}<i class="bi bi-check-circle-fill me-2"></i>
+                {% elif status == 'warning' %}<i class="bi bi-exclamation-triangle-fill me-2"></i>
+                {% else %}<i class="bi bi-x-circle-fill me-2"></i>{% endif %}
+                {{ message }}
+            </div>
+        {% endif %}
+
+        <div class="tab-content" id="scannerTabContent">
+            
+            <!-- TAB 1: QR CODE & MANUAL TICKET SCANNER -->
+            <div class="tab-pane fade show active" id="scan-pane" role="tabpanel" aria-labelledby="scan-tab">
+                <!-- CAMERA VIEWER BOX -->
+                <div id="reader" class="mb-4" style="width: 100%; border-radius: 12px; overflow: hidden; border: 2px solid #eee;"></div>
+
+                <div class="text-center mb-3">
+                    <span class="text-muted small fw-bold text-uppercase">— OR ENTER TICKET ID MANUALLY —</span>
+                </div>
+
+                <form method="POST" action="{% url 'events:scan_ticket' event.id %}" id="scanForm" class="mb-4">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <input type="text" id="ticketInput" name="ticket_id" class="form-control form-control-lg text-center fw-bold text-uppercase bg-light" placeholder="e.g. TKT-A1B2C3" required style="letter-spacing: 2px; font-size: 1.3rem; border-radius: 12px;">
+                    </div>
+                    <button type="submit" class="btn btn-lg w-100 fw-bold text-white shadow-sm" style="background-color: var(--primary-green); border-radius: 12px; padding: 14px;">
+                        Verify Ticket
+                    </button>
+                </form>
+            </div>
+
+        </div>
+
+        <div class="text-center mt-2">
+            <a href="{% url 'events:manage_event' event.id %}" class="text-decoration-none text-muted fw-bold small">
+                <i class="bi bi-arrow-left me-1"></i> Back to Event Management
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    let isScanned = false;
+    
+    function onScanSuccess(decodedText, decodedResult) {
+        if (isScanned) return; 
+        isScanned = true;     
+        
+        document.getElementById('ticketInput').value = decodedText;
+        document.getElementById('scanForm').submit();
+    }
+
+    function onScanFailure(error) {
+        // Ignore search frame errors
+    }
+
+    let html5QrcodeScanner = new Html5QrcodeScanner(
+        "reader",
+        { fps: 10, qrbox: {width: 250, height: 250} },
+        false);
+        
+    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+</script>
+{% endblock %}

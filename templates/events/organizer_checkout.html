@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5 d-flex justify-content-center align-items-center" style="min-height: 75vh;">
+    <div class="card border-0 shadow-lg p-0" style="border-radius: 20px; max-width: 600px; width: 100%; overflow: hidden;">
+        
+        <!-- Header -->
+        <div class="bg-light p-4 text-center border-bottom">
+            <h3 class="fw-bold mb-1" style="color: var(--primary-green); font-family: 'Merriweather', serif;">Publish Your Event</h3>
+            <p class="text-muted mb-0">Pay the one-time hosting fee to make your free event public.</p>
+        </div>
+
+        <div class="p-4 p-md-5">
+            {% if error %}
+                <div class="alert alert-danger fw-bold shadow-sm mb-4" style="border-radius: 12px;">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ error }}
+                </div>
+            {% endif %}
+            
+            <!-- Event Summary -->
+            <div class="d-flex align-items-center mb-4 p-3 bg-light" style="border-radius: 12px;">
+                {% if event.image %}
+                    <img src="{{ event.image.url }}" class="me-3 shadow-sm" style="width: 80px; height: 80px; object-fit: cover; border-radius: 12px;" alt="{{ event.title }}">
+                {% else %}
+                    <div class="me-3 bg-white shadow-sm d-flex justify-content-center align-items-center text-muted" style="width: 80px; height: 80px; border-radius: 12px;">
+                        <i class="bi bi-image fs-3"></i>
+                    </div>
+                {% endif %}
+                <div>
+                    <h5 class="fw-bold mb-1 text-truncate" style="max-width: 300px;">{{ event.title }}</h5>
+                    <p class="text-muted small mb-0"><i class="bi bi-calendar-event me-1"></i> {{ event.date|date:"D, M j, Y" }}</p>
+                    <span class="badge bg-warning text-dark mt-2">Status: Pending Payment</span>
+                </div>
+            </div>
+            
+            <!-- Payment Breakdown -->
+            <h6 class="fw-bold text-uppercase text-muted mb-3 small">Payment Summary</h6>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-dark">Standard Free Event Hosting Fee</span>
+                <span class="fw-bold">GH₵ {{ fee|floatformat:2 }}</span>
+            </div>
+            
+            <hr class="my-4">
+            
+            <div class="d-flex justify-content-between align-items-center mb-5">
+                <span class="fw-bold fs-5">Total</span>
+                <span class="fw-bold fs-3" style="color: var(--primary-green);">GH₵ {{ fee|floatformat:2 }}</span>
+            </div>
+            
+            <form method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-lg w-100 fw-bold shadow-sm text-white" style="background-color: var(--primary-green); border-radius: 12px; padding: 16px;">
+                    <i class="bi bi-lock-fill me-2"></i> Pay GH₵ {{ fee|floatformat:2 }} & Publish
+                </button>
+            </form>
+            
+            <div class="text-center mt-3">
+                <a href="{% url 'events:dashboard' %}" class="text-decoration-none text-muted small fw-bold">Cancel and return to dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

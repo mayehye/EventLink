@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5 w-100" style="max-width: 600px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-0">Scanned Tickets</h3>
+            <p class="text-muted small">{{ event.title }}</p>
+        </div>
+        <a href="{% url 'events:manage_event' event.id %}" class="btn btn-sm btn-outline-secondary fw-bold rounded-pill">Back</a>
+    </div>
+
+    {% if scanned_tickets %}
+        <div class="d-flex justify-content-end mb-3">
+            <a href="{% url 'events:clear_scanned_tickets' event.id %}" class="btn btn-sm btn-danger fw-bold shadow-sm rounded-pill" onclick="return confirm('Are you sure you want to permanently delete all scanned ticket records?');">
+                <i class="bi bi-trash-fill me-1"></i> Clear All Scanned
+            </a>
+        </div>
+        
+        <div class="bg-white border rounded-4 p-4 shadow-sm" style="font-family: monospace; font-size: 1.1rem;">
+            {% for ticket in scanned_tickets %}
+                <div class="d-flex justify-content-between border-bottom py-2">
+                    <span class="fw-bold text-dark">{{ ticket.ticket_id }}</span>
+                    <span class="text-muted small">{{ ticket.scanned_at|date:"M d, g:i A" }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center bg-light rounded-4 p-5">
+            <i class="bi bi-ticket-detailed fs-1 text-muted mb-3"></i>
+            <h5 class="fw-bold">No Tickets Scanned Yet</h5>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

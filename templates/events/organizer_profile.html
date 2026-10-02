@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Organizer Header Card -->
+    <div class="card border-0 shadow-sm p-4 mb-5 bg-light" style="border-radius: 16px;">
+        <div class="d-flex align-items-center gap-3">
+            <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-3" style="width: 64px; height: 64px;">
+                {{ organizer.organization_name|slice:":1"|upper|default:"O" }}
+            </div>
+            <div>
+                <h3 class="fw-bold mb-1 d-flex align-items-center gap-1">
+                    {{ organizer.organization_name|default:organizer.user.username }}
+                    
+                    <!-- Blue Circular Verified Badge -->
+                    {% if organizer.is_verified %}
+                        <span class="d-inline-flex align-items-center justify-content-center text-white ms-1" style="width: 20px; height: 20px; background-color: #0866FF; border-radius: 50%; font-size: 12px; vertical-align: middle;" title="Verified Organizer">
+                            <i class="bi bi-check" style="line-height: 1; font-weight: 900;"></i>
+                        </span>
+                    {% endif %}
+                </h3>
+                
+                {% if organizer.is_verified %}
+                    <span class="text-primary small fw-bold" style="color: #0866FF !important;">
+                        <i class="bi bi-patch-check-fill me-1"></i> Verified Organizer
+                    </span>
+                {% else %}
+                   <span class="d-inline-flex align-items-center justify-content-center text-white ms-1" style="width: 20px; height: 20px; background-color: #0866FF; border-radius: 50%; font-size: 11px; vertical-align: middle;" title="Verified Organizer">
+                                <i class="bi bi-check" style="line-height: 1; font-weight: 900;"></i>        
+                    </span>
+                    <span class="text-primary fw-bold ms-1" style="font-size: 0.7rem; color: #0866FF !important;">Verified</span>                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Organizer's Events Section -->
+    <h4 class="fw-bold mb-4">Events by {{ organizer.organization_name|default:organizer.user.username }}</h4>
+    
+    <div class="row">
+        {% for event in events %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 16px; overflow: hidden;">
+                {% if event.image %}
+                    <img src="{{ event.image.url }}" alt="Event Poster" class="card-img-top" style="height: 180px; object-fit: cover;">
+                {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center text-muted" style="height: 180px;">
+                        <i class="bi bi-image fs-1"></i>
+                    </div>
+                {% endif %}
+
+                <div class="card-body p-4 d-flex flex-column">
+                    <h5 class="fw-bold mb-2">{{ event.title }}</h5>
+                    <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill me-1"></i> {{ event.location }}</p>
+                    <p class="text-muted small mb-4"><i class="bi bi-calendar-event me-1"></i> {{ event.date|date:"M d, Y" }}</p>
+
+                    <div class="mt-auto">
+                        <a href="{% url 'events:event_detail' event.id %}" class="btn btn-sm text-white fw-bold w-100 shadow-sm" style="background-color: var(--primary-green); border-radius: 8px;">
+                            View Event & Tickets
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <p class="text-muted">This organizer has no active events listed right now.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

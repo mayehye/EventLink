@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5 d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="card border-0 shadow-sm p-4 p-md-5" style="border-radius: 16px; max-width: 450px; width: 100%;">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold" style="font-family: 'Merriweather', serif;">Welcome Back</h2>
+            <p class="text-muted">Log in to manage your events</p>
+        </div>
+        
+        <form method="POST">
+                {% csrf_token %}
+                
+                <!-- Username Field -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-muted small text-uppercase">Username</label>
+                    <input type="text" name="username" class="form-control form-control-lg bg-light fw-bold" required placeholder="Enter your username">
+                </div>
+
+                <!-- NEW: Display Login Errors Here -->
+                {% if form.errors %}
+                    <div class="alert alert-danger fw-bold small shadow-sm mb-4" style="border-radius: 8px;">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> Invalid username or password. Please try again.
+                    </div>
+                {% endif %}
+
+                <!-- Password Field with Toggle -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label fw-bold text-muted small text-uppercase mb-0">Password</label>
+                        <!-- Forgot Password Link -->
+                        <a href="{% url 'accounts:password_reset' %}" class="small text-decoration-none fw-bold" style="color: var(--primary-green);">Forgot Password?</a>
+                    </div>
+                    
+                    <!-- The Input Group -->
+                    <div class="input-group shadow-sm" style="border-radius: 12px; overflow: hidden;">
+                        <input type="password" name="password" id="passwordField" class="form-control form-control-lg bg-light border-end-0 fw-bold" required placeholder="Enter your password">
+                        <button class="btn btn-light border border-start-0 bg-light px-3" type="button" id="togglePassword">
+                            <i class="bi bi-eye-slash text-muted" id="toggleIcon"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- The Main Submit Button (Safely outside the password div) -->
+                <button type="submit" class="btn btn-lg w-100 fw-bold shadow-sm text-white mt-3" style="background-color: var(--primary-green); border-radius: 12px; padding: 16px;">
+                    Log In
+                </button>
+                
+            </form>
+        
+        <div class="text-center mt-3">
+            <span class="text-muted">Don't have an account?</span> 
+            <a href="{% url 'accounts:register' %}" class="fw-bold text-decoration-none" style="color: var(--primary-green);">Register here</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('togglePassword').addEventListener('click', function() {
+        const passwordField = document.getElementById('passwordField');
+        const toggleIcon = document.getElementById('toggleIcon');
+        
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            toggleIcon.classList.replace('bi-eye-slash', 'bi-eye');
+        } else {
+            passwordField.type = 'password';
+            toggleIcon.classList.replace('bi-eye', 'bi-eye-slash');
+        }
+    });
+</script>
+{% endblock %}

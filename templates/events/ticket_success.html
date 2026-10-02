@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5 d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="card border-0 shadow-sm p-5 text-center" style="border-radius: 20px; max-width: 500px; width: 100%;">
+        
+        {% if failed %}
+            <i class="bi bi-x-circle-fill text-danger mb-3" style="font-size: 4rem;"></i>
+            <h2 class="fw-bold mb-3">Payment Failed</h2>
+            <p class="text-muted mb-4">Your payment could not be processed or was canceled.</p>
+            <a href="{% url 'events:home' %}" class="btn btn-outline-secondary w-100 fw-bold">Return to Events</a>
+        {% else %}
+            <i class="bi bi-check-circle-fill text-success mb-3" style="font-size: 4rem;"></i>
+            <h2 class="fw-bold mb-3">Payment Successful!</h2>
+            <p class="text-muted mb-4">Your tickets for <strong>{{ event.title }}</strong> have been generated.</p>
+            
+            <div class="bg-light p-3 mb-4 text-start" style="border-radius: 12px; border: 1px dashed #ccc;">
+                <p class="mb-1 text-muted small text-uppercase fw-bold">Order Summary</p>
+                
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Tickets Generated:</span>
+                    <span class="fw-bold text-dark">{{ tickets.count }}</span>
+                </div>
+                
+                <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
+                    <span class="text-muted">Total Paid:</span>
+                    <span class="fw-bold text-dark">GH₵ {{ total_paid }}</span>
+                </div>
+
+                <p class="mb-1 text-muted small text-uppercase fw-bold">Your Unique IDs</p>
+                {% for ticket in tickets %}
+                    <span class="badge bg-white text-dark border me-1 mb-1">{{ ticket.ticket_id }}</span>
+                {% endfor %}
+            </div>
+            
+            <a href="{% url 'events:my_tickets' %}" class="btn btn-lg w-100 fw-bold shadow-sm" style="background-color: var(--primary-green); color: white; border-radius: 12px;">View My Tickets</a>
+        {% endif %}
+        
+    </div>
+</div>
+{% endblock %}

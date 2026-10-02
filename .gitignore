@@ -1,0 +1,17 @@
+# Environment variables
+.env
+
+# Virtual Environment
+venv/
+env/
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Archives
+*.zip
+
+# Django Media / User Uploads
+media/

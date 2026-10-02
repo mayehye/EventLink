@@ -1,0 +1,488 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Hero Section */
+    .hero-section {
+        position: relative;
+        padding: 100px 0;
+        background: url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1920&q=80') no-repeat center center;
+        background-size: cover;
+        color: white;
+        overflow: hidden;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        backdrop-filter: blur(2px);
+        -webkit-backdrop-filter: blur(4px);
+        z-index: 1;
+    }
+
+    .hero-section .container {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .search-box {
+        background: white;
+        padding: 10px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        display: flex;
+    }
+    
+    .search-box input {
+        border: none;
+        box-shadow: none;
+        padding-left: 15px;
+    }
+    
+    .search-box input:focus {
+        outline: none;
+    }
+
+    /* Featured Swipeable Scroll Row */
+    .featured-scroll {
+        display: flex;
+        gap: 20px;
+        overflow-x: auto;
+        padding-bottom: 15px;
+        scrollbar-width: thin;
+        scroll-snap-type: x mandatory;
+    }
+    .featured-scroll::-webkit-scrollbar {
+        height: 6px;
+    }
+    .featured-scroll::-webkit-scrollbar-thumb {
+        background: rgba(10, 77, 60, 0.2);
+        border-radius: 10px;
+    }
+    .featured-card-wrapper {
+        min-width: 320px;
+        max-width: 350px;
+        scroll-snap-align: start;
+        flex-shrink: 0;
+    }
+
+    /* Category Scroll */
+    .category-scroll {
+        display: flex;
+        gap: 15px;
+        overflow-x: auto;
+        padding-bottom: 15px;
+        scrollbar-width: none;
+    }
+    .category-scroll::-webkit-scrollbar {
+        display: none;
+    }
+    .category-card {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 30px;
+        padding: 8px 24px;
+        color: var(--text-dark);
+        font-weight: 500;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+    }
+    .category-card:hover, .category-card.active {
+        background: var(--primary-green);
+        color: white;
+        border-color: var(--primary-green);
+    }
+    
+    /* Event Card */
+    .event-card {
+        border: none;
+        border-radius: 16px;
+        background: white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        transition: transform 0.2s;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .event-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    }
+    
+    .card-img-wrapper {
+        position: relative;
+        height: 200px;
+        background-color: #1A1A1A;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 16px 16px 0 0;
+        overflow: hidden;
+    }
+    
+    .poster-container {
+        height: 100%;
+        max-width: 100%;
+    }
+
+    .poster-img {
+        height: 100%;
+        max-width: 100%;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+    }
+    
+    .mini-circle {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 65px;
+        height: 65px;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        color: white;
+        text-align: center;
+        line-height: 1.1;
+        border: 3px solid white;
+        z-index: 5;
+    }
+
+    .mini-date {
+        left: 15px;
+        background-color: var(--primary-green);
+    }
+
+    .mini-rate {
+        right: 15px;
+        background-color: #FFB300;
+        color: #1A1A1A;
+    }
+
+    .event-image-placeholder {
+        width: 200px;
+        height: 100%;
+        background: repeating-linear-gradient(45deg, var(--primary-green), var(--primary-green) 10px, #083d2f 10px, #083d2f 20px);
+    }
+</style>
+
+<!-- HERO SECTION -->
+<div class="hero-section text-center mb-5">
+    <div class="container" style="max-width: 800px;">
+        <h1 class="display-4 fw-bold mb-4">Find Your Next Amazing Event</h1>
+        <p class="lead mb-5" style="color: rgba(255,255,255,0.8);">Discover • Book • Enjoy</p>
+        
+        <!-- Search Form -->
+        <form action="{% url 'events:home' %}#events-section" method="GET" class="search-box mb-2" id="search-form">
+            <input type="text" name="q" id="search-input" class="form-control form-control-lg" placeholder="Search for events, venue, city..." autocomplete="off" value="{{ search_query|default_if_none:'' }}">
+            
+            {% if selected_category %}
+                <input type="hidden" name="category" value="{{ selected_category }}">
+            {% endif %}
+
+            <button type="submit" class="btn btn-custom ms-2 px-4 py-2" style="background-color: var(--primary-green); color: white;">Search</button>
+        </form>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <!-- 2. SECTION: TODAY'S EVENTS (Swipeable Scroll Row) - Hidden when filtering -->
+    {% if todays_events and not search_query and not selected_category %}
+    <div class="mb-5">
+        <div class="d-flex align-items-center mb-3">
+            <h4 class="fw-bold mb-0" style="color: var(--primary-green); font-family: 'Merriweather', serif;">
+                🔥 Happening Today
+            </h4>
+            <span class="badge bg-danger bg-opacity-10 text-danger ms-3 fw-bold small px-3 py-2 rounded-pill">Swipe to explore <i class="bi bi-arrow-right ms-1"></i></span>
+        </div>
+
+        <div class="featured-scroll">
+            {% for event in todays_events %}
+            <div class="featured-card-wrapper">
+                <div class="event-card h-100 shadow-sm border">
+                    <div class="card-img-wrapper" style="height: 180px; position: relative;">
+                        <a href="{% url 'events:event_detail' event.id %}" class="d-block h-100 w-100">
+                            <div class="poster-container h-100 w-100">
+                                {% if event.image %}
+                                    <img src="{{ event.image.url }}" class="poster-img" alt="{{ event.title }}">
+                                {% else %}
+                                    <div class="event-image-placeholder h-100 w-100"></div>
+                                {% endif %}
+                            </div>
+                        </a>
+                        
+                        <div class="mini-circle mini-date" style="pointer-events: none;">
+                            <span style="font-size: 1.1rem; font-weight: 900;">{{ event.date|date:"d" }}</span>
+                            <span style="font-size: 0.65rem; text-transform: uppercase;">{{ event.date|date:"M" }}</span>
+                        </div>
+
+                        <div class="mini-circle mini-rate" style="pointer-events: none;">
+                            <span style="font-size: 0.55rem; text-transform: uppercase;">Rate</span>
+                            <span style="font-size: 0.85rem; font-weight: 900;">{{ event.gate_fee|default:"Free" }}</span>
+                        </div>
+
+                        <span class="badge bg-danger text-white position-absolute top-0 start-0 m-3 fw-bold shadow-sm" style="z-index: 6; pointer-events: none;">Live Today</span>
+                    </div>
+                    
+                    <div class="card-body p-3 d-flex flex-column">
+                        <h5 class="card-title fw-bold mb-1 text-truncate">{{ event.title }}</h5>
+                        <p class="text-muted mb-2" style="font-size: 0.8rem;">
+                            By <strong class="text-dark">{{ event.organizer.organization_name }}</strong>
+                            {% if event.organizer.verification_status == 'Verified' or event.organizer.is_verified %}
+                                <span class="d-inline-flex align-items-center justify-content-center text-white ms-1" style="width: 16px; height: 16px; background-color: #0866FF; border-radius: 50%; font-size: 9px; vertical-align: middle;" title="Verified Organizer">
+                                    <i class="bi bi-check" style="line-height: 1; font-weight: 900;"></i>
+                                </span>
+                                <span class="fw-bold ms-1" style="font-size: 0.65rem; color: #0866FF !important;">Verified</span>
+                            {% endif %}
+                        </p>
+
+                        <div class="mb-3 text-muted small">
+                            {% if event.start_time %}
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="bi bi-clock me-1"></i>
+                                <span>{{ event.start_time|time:"g:i a" }}{% if event.end_time %} - {{ event.end_time|time:"g:i a" }}{% endif %}</span>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <i class="bi bi-geo-alt me-1"></i> {{ event.location }}
+                            </div>
+                        </div>
+                        
+                        <a href="{% url 'events:event_detail' event.id %}" class="btn btn-sm w-100 fw-bold mt-auto text-white" style="background-color: var(--primary-green); border-radius: 8px;">
+                            {% if event.is_free or event.ticket_price < 1 and not event.ticket_tiers.exists %}
+                                View Details
+                            {% else %}
+                                Buy Ticket
+                            {% endif %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- 1. SECTION: PROMOTIONAL / FEATURED EVENTS - Hidden when filtering -->
+    {% if featured_verified_events and not search_query and not selected_category %}
+    <div class="mb-5">
+        <div class="d-flex align-items-center mb-3">
+            <h4 class="fw-bold mb-0" style="color: var(--primary-green); font-family: 'Merriweather', serif;">
+                <i class="bi bi-star-fill text-warning me-2"></i> Promotional Events
+            </h4>
+            <span class="badge bg-success bg-opacity-10 text-success ms-3 fw-bold small px-3 py-2 rounded-pill">Swipe to explore <i class="bi bi-arrow-right ms-1"></i></span>
+        </div>
+
+        <div class="featured-scroll">
+            {% for event in featured_verified_events %}
+            <div class="featured-card-wrapper">
+                <div class="event-card h-100 shadow-sm border">
+                    <div class="card-img-wrapper" style="height: 180px; position: relative;">
+                        <a href="{% url 'events:event_detail' event.id %}" class="d-block h-100 w-100">
+                            <div class="poster-container h-100 w-100">
+                                {% if event.image %}
+                                    <img src="{{ event.image.url }}" class="poster-img" alt="{{ event.title }}">
+                                {% else %}
+                                    <div class="event-image-placeholder h-100 w-100"></div>
+                                {% endif %}
+                            </div>
+                        </a>
+                        
+                        <div class="mini-circle mini-date" style="pointer-events: none;">
+                            <span style="font-size: 1.1rem; font-weight: 900;">{{ event.date|date:"d" }}</span>
+                            <span style="font-size: 0.65rem; text-transform: uppercase;">{{ event.date|date:"M" }}</span>
+                        </div>
+
+                        <div class="mini-circle mini-rate" style="pointer-events: none;">
+                            <span style="font-size: 0.55rem; text-transform: uppercase;">Rate</span>
+                            <span style="font-size: 0.85rem; font-weight: 900;">{{ event.gate_fee|default:"Free" }}</span>
+                        </div>
+
+                        <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-3 fw-bold shadow-sm" style="z-index: 6; pointer-events: none;">Promoted</span>
+                    </div>
+                    
+                    <div class="card-body p-3 d-flex flex-column">
+                        <h5 class="card-title fw-bold mb-1 text-truncate">{{ event.title }}</h5>
+                        <p class="text-muted mb-2" style="font-size: 0.8rem;">
+                            By <strong class="text-dark">{{ event.organizer.organization_name }}</strong>
+                            {% if event.organizer.verification_status == 'Verified' or event.organizer.is_verified %}
+                                <span class="d-inline-flex align-items-center justify-content-center text-white ms-1" style="width: 16px; height: 16px; background-color: #0866FF; border-radius: 50%; font-size: 9px; vertical-align: middle;" title="Verified Organizer">
+                                    <i class="bi bi-check" style="line-height: 1; font-weight: 900;"></i>
+                                </span>
+                                <span class="fw-bold ms-1" style="font-size: 0.65rem; color: #0866FF !important;">Verified</span>
+                            {% endif %}
+                        </p>
+                        <div class="mb-3 text-muted small">
+                            <i class="bi bi-geo-alt me-1"></i> {{ event.location }}
+                        </div>
+                        <a href="{% url 'events:event_detail' event.id %}" class="btn btn-sm w-100 fw-bold mt-auto text-white" style="background-color: var(--primary-green); border-radius: 8px;">
+                            {% if event.is_free or event.ticket_price < 1 and not event.ticket_tiers.exists %}
+                                View Details
+                            {% else %}
+                                Buy Ticket
+                            {% endif %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- CATEGORIES SECTION -->
+    <div id="events-section">
+        <h5 class="fw-bold mb-3">Explore Categories</h5>
+        <div class="category-scroll mb-4">
+            <a href="{% url 'events:home' %}{% if search_query %}?q={{ search_query }}{% endif %}#events-section" class="category-card {% if not selected_category %}active{% endif %}">All Events</a>
+            
+            {% for category in categories %}
+                <a href="?category={{ category.id }}{% if search_query %}&q={{ search_query }}{% endif %}#events-section" class="category-card {% if selected_category == category.id|stringformat:'s' or selected_category == category.slug %}active{% endif %}">
+                    {{ category.name }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- EVENTS GRID HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold mb-0">
+            {% if search_query %}Search Results for "{{ search_query }}"{% else %}General & Upcoming Events{% endif %}
+        </h3>
+        {% if search_query or selected_category %}
+            <a href="{% url 'events:home' %}" class="text-decoration-none fw-bold small" style="color: var(--primary-green);">Clear Filters</a>
+        {% endif %}
+    </div>
+    
+    <!-- 3. SECTION: GENERAL / UPCOMING EVENTS (Includes promoted and live events too!) -->
+    <div class="row g-4" id="events-grid">
+        {% if events %}
+            {% for event in events %}
+            <div class="col-md-4">
+                <div class="event-card h-100">
+                    <div class="card-img-wrapper">
+                        <a href="{% url 'events:event_detail' event.id %}" class="d-block h-100 w-100">
+                            <div class="poster-container h-100 w-100">
+                                {% if event.image %}
+                                    <img src="{{ event.image.url }}" class="poster-img" alt="{{ event.title }}">
+                                {% else %}
+                                    <div class="event-image-placeholder h-100 w-100"></div>
+                                {% endif %}
+                            </div>
+                        </a>
+                        
+                        <div class="mini-circle mini-date" style="pointer-events: none;">
+                            <span style="font-size: 1.2rem; font-weight: 900;">{{ event.date|date:"d" }}</span>
+                            <span style="font-size: 0.7rem; text-transform: uppercase;">{{ event.date|date:"M" }}</span>
+                        </div>
+
+                        <div class="mini-circle mini-rate" style="pointer-events: none;">
+                            <span style="font-size: 0.6rem; text-transform: uppercase;">Rate</span>
+                            <span style="font-size: 0.9rem; font-weight: 900;">{{ event.gate_fee|default:"Free" }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="mb-2">
+                            {% if event.is_featured %}
+                                <span class="badge bg-warning text-dark me-1">Promoted</span>
+                            {% endif %}
+                            {% if event.category %}
+                                <span class="badge bg-light text-dark border">{{ event.category.name }}</span>
+                            {% endif %}
+                        </div>
+                        
+                        <h5 class="card-title fw-bold mb-1">{{ event.title }}</h5>
+                        
+                        <p class="text-muted mb-3" style="font-size: 0.85rem;">
+                            By <strong class="text-dark">{{ event.organizer.organization_name }}</strong>
+                            {% if event.organizer.verification_status == 'Verified' or event.organizer.is_verified %}
+                            <span class="d-inline-flex align-items-center justify-content-center text-white ms-1" style="width: 20px; height: 20px; background-color: #0866FF; border-radius: 50%; font-size: 11px; vertical-align: middle;" title="Verified Organizer">
+                                <i class="bi bi-check" style="line-height: 1; font-weight: 900;"></i>
+                            </span>
+                            <span class="text-primary fw-bold ms-1" style="font-size: 0.7rem; color: #0866FF !important;">Verified</span>
+                            {% endif %}
+                        </p>
+
+                        <div class="mb-4">
+                            {% if event.start_time %}
+                            <div class="d-flex align-items-start mb-2 text-muted" style="font-size: 0.9rem;">
+                                <i class="bi bi-clock me-2 mt-1"></i>
+                                <span>{{ event.start_time|time:"g:i a" }}{% if event.end_time %} - {{ event.end_time|time:"g:i a" }}{% endif %}</span>
+                            </div>
+                            {% endif %}
+                            <div class="d-flex align-items-start text-muted" style="font-size: 0.9rem;">
+                                <i class="bi bi-geo-alt me-2 mt-1"></i>
+                                <span>{{ event.venue|default:"" }} {% if event.venue and event.location %},{% endif %} {{ event.location }}</span>
+                            </div>
+                        </div>
+                        
+                        <a href="{% url 'events:event_detail' event.id %}" class="btn w-100 fw-bold mt-auto" style="border: 1px solid var(--primary-green); color: var(--primary-green); border-radius: 8px;">
+                            {% if event.is_free or event.ticket_price < 1 and not event.ticket_tiers.exists %}
+                                View Details
+                            {% else %}
+                                Buy Ticket
+                            {% endif %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-calendar-x text-muted" style="font-size: 3rem;"></i>
+                <h5 class="mt-3 text-muted">No upcoming events matching your search or category were found.</h5>
+                <a href="{% url 'events:home' %}" class="btn btn-dark btn-sm fw-bold mt-2">Reset Filters</a>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- LIVE SEARCH JAVASCRIPT -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('search-input');
+        const eventsGrid = document.getElementById('events-grid');
+        let typingTimer;
+        
+        searchInput.addEventListener('input', function() {
+            clearTimeout(typingTimer);
+            
+            typingTimer = setTimeout(function() {
+                const query = searchInput.value;
+                const urlParams = new URLSearchParams(window.location.search);
+                const categoryParam = urlParams.get('category');
+                
+                let fetchUrl = `/?q=${encodeURIComponent(query)}`;
+                if (categoryParam) {
+                    fetchUrl += `&category=${encodeURIComponent(categoryParam)}`;
+                }
+                
+                fetch(fetchUrl)
+                    .then(response => response.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const newGrid = doc.getElementById('events-grid');
+                        
+                        if (newGrid) {
+                            eventsGrid.innerHTML = newGrid.innerHTML;
+                        }
+                    });
+            }, 300);
+        });
+    });
+</script>
+{% endblock %}

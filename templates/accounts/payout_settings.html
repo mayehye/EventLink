@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4 p-md-5">
+                    
+                    <div class="text-center mb-4">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle mb-3" style="width: 60px; height: 60px;">
+                            <i class="bi bi-wallet2 fs-3"></i>
+                        </div>
+                        <h3 class="fw-bold" style="font-family: 'Merriweather', serif;">Paystack Payout Setup</h3>
+                        <p class="text-muted small">Connect your bank account or mobile money to receive direct payouts for ticket sales on EventLink.</p>
+                    </div>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-3 small" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if organizer.paystack_subaccount_code %}
+                        <div class="rounded-4 p-4 mb-4 text-white shadow-sm" style="background-color: var(--primary-green);">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-check-circle-fill fs-4 me-2"></i>
+                                <h5 class="fw-bold mb-0 text-white">Payout Account Connected</h5>
+                            </div>
+                            <ul class="list-unstyled small mb-0 opacity-90">
+                                <li class="py-1"><strong>Provider / Bank: {{ organizer.momo_network|upper }}</strong> <span class="badge bg-white text-dark">{{ organizer.settlement_bank }}</span></li>
+                                <li class="py-1"><strong>Account-Number:<strong>{{ organizer.momo_number }}</strong></strong> <strong class="text-white">{{ organizer.account_number }}</strong></li>
+                                <li class="py-1"><strong>Subaccount Code:</strong> <code class="text-white bg-dark bg-opacity-25 px-2 py-1 rounded">{{ organizer.paystack_subaccount_code }}</code></li>
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <!-- Hidden input that actually submits the selected bank/network value -->
+                        <input type="hidden" name="settlement_bank" id="selectedBank" value="{{ organizer.settlement_bank|default:'' }}">
+
+                        <div class="mb-3 text-start">
+                            <label for="settlement_bank" class="form-label fw-bold small text-muted text-uppercase">Bank Name / Mobile Money Provider</label>
+                            
+                            <!-- Custom Bootstrap Dropdown -->
+                            <div class="dropdown w-100">
+                                <button class="btn btn-white bg-white border shadow-sm dropdown-toggle fw-bold px-3 py-2 rounded-3 text-dark d-flex align-items-center justify-content-between w-100" type="button" id="bankDropdownButton" data-bs-toggle="dropdown" aria-expanded="false" style="min-height: 48px;">
+                                    <span id="currentBankSelection">
+                                        {% if organizer.settlement_bank == 'MTN' %}🟡 MTN Mobile Money (Momo)
+                                        {% elif organizer.settlement_bank == 'VOD' %}🔴 Vodafone / Telecel Cash
+                                        {% elif organizer.settlement_bank == 'AIR' %}🔵 AirtelTigo Money
+                                        {% elif organizer.settlement_bank == 'BANK' %}🏦 Bank Account Transfer
+                                        {% else %}Select your bank or network{% endif %}
+                                    </span>
+                                </button>
+                                <ul class="dropdown-menu shadow-sm border-0 rounded-3 py-2 w-100" aria-labelledby="bankDropdownButton">
+                                    <li><a class="dropdown-item py-2 fw-semibold bank-option" href="#" data-value="MTN">🟡 MTN Mobile Money (Momo)</a></li>
+                                    <li><a class="dropdown-item py-2 fw-semibold bank-option" href="#" data-value="VOD">🔴 Vodafone / Telecel Cash</a></li>
+                                    <li><a class="dropdown-item py-2 fw-semibold bank-option" href="#" data-value="AIR">🔵 AirtelTigo Money</a></li>
+                                    <li><a class="dropdown-item py-2 fw-semibold bank-option" href="#" data-value="BANK">🏦 Bank Account Transfer</a></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="mb-4 text-start">
+                            <label for="account_number" class="form-label fw-bold small text-muted text-uppercase">Account Number / Phone Number</label>
+                            <input type="text" class="form-control rounded-3 py-2 bg-white shadow-sm" id="account_number" name="account_number" value="{{ organizer.account_number|default:'' }}" placeholder="Enter account or mobile number" required>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn text-white fw-bold py-3 shadow-sm" style="background-color: var(--primary-green); border-radius: 12px;">
+                                <i class="bi bi-shield-check me-2"></i> Save & Connect Paystack Account
+                            </button>
+                            <a href="{% url 'events:dashboard' %}" class="btn btn-light fw-bold py-2 text-muted" style="border-radius: 12px;">
+                                Back to Dashboard
+                            </a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript to handle custom Bootstrap dropdown selection -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectedBankInput = document.getElementById('selectedBank');
+        const currentBankSelectionText = document.getElementById('currentBankSelection');
+        const bankOptions = document.querySelectorAll('.bank-option');
+
+        bankOptions.forEach(option => {
+            option.addEventListener('click', function(e) {
+                e.preventDefault();
+                const val = this.getAttribute('data-value');
+                const text = this.textContent;
+
+                // Update hidden input value
+                selectedBankInput.value = val;
+
+                // Update button text display
+                currentBankSelectionText.textContent = text;
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    
+    <div>
+                <h3 class="fw-bold mb-1 d-flex align-items-center flex-wrap gap-2">
+                    <span>{{ organizer.organization_name|default:organizer.user.username }}</span>
+                    
+                    <!-- Blue Circular Verified Badge -->
+                    {% if organizer.is_verified %}
+                        <span class="d-inline-flex align-items-center justify-content-center text-white" style="width: 20px; height: 20px; background-color: #0866FF; border-radius: 50%; font-size: 12px;" title="Verified Organizer">
+                            <i class="bi bi-check" style="line-height: 1; font-weight: 900;"></i>
+                        </span>
+
+                        <span class="text-primary fw-bold" style="font-size: 0.8rem; color: #0866FF !important;">
+                            • Verified Organizer
+                        </span>
+                    {% endif %}
+                </h3>
+                
+                {% if not organizer.is_verified %}
+                    <span class="text-muted small">
+                        <i class="bi bi-shield me-1"></i> Independent Organizer
+                    </span>
+                {% endif %}
+            </div>
+
+    <!-- Organizer's Events Grid -->
+    <h4 class="fw-bold mb-4 border-bottom pb-2">Events by {{ organizer.organization_name }}</h4>
+    
+    <div class="row g-4">
+        {% for event in events %}
+            <div class="col-md-6 col-lg-4">
+                <a href="{% url 'events:event_detail' event.id %}" class="text-decoration-none text-dark">
+                    <div class="card h-100 border-0 shadow-sm event-card" style="border-radius: 16px; transition: transform 0.2s;">
+                        
+                        <!-- Image -->
+                        <div style="height: 200px; background-color: #f8f9fa; border-radius: 16px 16px 0 0; overflow: hidden;">
+                            {% if event.image %}
+                                <img src="{{ event.image.url }}" alt="{{ event.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            {% else %}
+                                <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted bg-light">
+                                    <i class="bi bi-image" style="font-size: 2rem;"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Details -->
+                        <div class="card-body p-4">
+                            <h5 class="fw-bold mb-2">{{ event.title }}</h5>
+                            <p class="text-muted small mb-2"><i class="bi bi-calendar-event me-2"></i>{{ event.date|date:"D, M j, Y" }}</p>
+                            <p class="text-muted small mb-3"><i class="bi bi-geo-alt me-2"></i>{{ event.location }}</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                                <span class="badge bg-light text-dark border">{{ event.category.name }}</span>
+                                <span class="fw-bold" style="color: var(--primary-green);">{{ event.gate_fee }}</span>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </a>
+            </div>
+        {% empty %}
+            <!-- If they have no active events -->
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-calendar-x text-muted mb-3" style="font-size: 3rem;"></i>
+                <h5 class="fw-bold text-muted">No upcoming events</h5>
+                <p class="text-muted">This organizer hasn't published any events yet.</p>
+            </div>
+        {% endfor %}
+    </div>
+    
+</div>
+
+<style>
+    .event-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+</style>
+{% endblock %}

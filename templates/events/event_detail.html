@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .detail-poster-container {
+        background-color: #1A1A1A;
+        border-radius: 24px;
+        overflow: hidden;
+        height: 500px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .detail-poster-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+    
+    .ticket-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+        border: 1px solid rgba(0,0,0,0.05);
+        position: sticky;
+        top: 20px;
+    }
+    
+    .info-row {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+    
+    .icon-circle {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background-color: rgba(10, 77, 60, 0.08);
+        color: var(--primary-green);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        margin-right: 16px;
+        flex-shrink: 0;
+    }
+    
+    .placeholder-bg {
+        width: 100%;
+        height: 100%;
+        background: repeating-linear-gradient(45deg, var(--primary-green), var(--primary-green) 20px, #083d2f 20px, #083d2f 40px);
+    }
+</style>
+
+<div class="container py-4 py-md-5">
+    
+    <!-- Back Button & Breadcrumbs -->
+    <div class="mb-4">
+        <a href="{% url 'events:home' %}" class="text-decoration-none text-muted fw-bold mb-3 d-inline-block">
+            <i class="bi bi-arrow-left me-2"></i> Back to Events
+        </a>
+    </div>
+
+    <div class="row g-5">
+        
+        <!-- LEFT COLUMN: Image & Description -->
+        <div class="col-lg-7 col-xl-8">
+            
+            <!-- Poster Wrapper -->
+            <div class="detail-poster-container mb-4">
+                {% if event.image %}
+                    <img src="{{ event.image.url }}" class="detail-poster-img" alt="{{ event.title }}">
+                {% else %}
+                    <div class="placeholder-bg"></div>
+                {% endif %}
+            </div>
+            
+            <!-- Tags -->
+            <div class="mb-3">
+                {% if event.is_featured %}
+                    <span class="badge bg-warning text-dark px-3 py-2 me-2 mb-2" style="border-radius: 8px;">Featured Event</span>
+                {% endif %}
+                <span class="badge bg-light text-dark border px-3 py-2 mb-2" style="border-radius: 8px;">{{ event.category.name }}</span>
+            </div>
+            
+            <!-- Title & Organizer -->
+            <h1 class="fw-bold mb-3" style="font-family: 'Merriweather', serif; font-size: 2.5rem;">{{ event.title }}</h1>
+            
+            <!-- Organizer Link -->
+            <a href="{% url 'events:organizer_profile' event.organizer.id %}" class="text-decoration-none text-dark">
+                <div class="d-flex align-items-center p-3 mb-5 bg-white border shadow-sm" style="border-radius: 12px; display: inline-flex; transition: all 0.2s;" onmouseover="this.style.boxShadow='0 8px 20px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='0 2px 4px rgba(0,0,0,0.05)'">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background-color: var(--primary-green); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 15px;">
+                        {{ event.organizer.organization_name|make_list|first|upper }}
+                    </div>
+                    <div>
+                        <p class="text-muted mb-0" style="font-size: 0.85rem;">Organized by</p>
+                        <h6 class="fw-bold mb-0">
+                            {{ event.organizer.organization_name }}
+                            {% if event.organizer.verification_status == 'Verified' %}
+                            <span class="d-inline-flex align-items-center justify-content-center text-white ms-1" style="width: 20px; height: 20px; background-color: #0866FF; border-radius: 50%; font-size: 11px; vertical-align: middle;" title="Verified Organizer">
+                                <i class="bi bi-check" style="line-height: 1; font-weight: 900;"></i>
+                            </span>                 
+                            <span class="text-primary fw-bold ms-1" style="font-size: 0.7rem; color: #0866FF !important;">Verified</span>                         
+                            {% endif %}
+                        </h6>
+                    </div>
+                </div>
+            </a>
+            
+            <!-- Description -->
+            <h4 class="fw-bold border-bottom pb-2 mb-4">About this event</h4>
+            <div class="text-muted" style="line-height: 1.8; font-size: 1.1rem; white-space: pre-line;">
+                {{ event.description }}
+            </div>
+            
+        </div>
+
+        <!-- RIGHT COLUMN: Booking Card -->
+        <div class="col-lg-5 col-xl-4">
+            <div class="ticket-card">
+                
+                <div class="text-center mb-4 pb-4 border-bottom">
+                    <p class="text-muted text-uppercase fw-bold mb-1" style="font-size: 0.85rem;">Standard</p>
+                    <h2 class="fw-bold mb-0" style="color: var(--primary-green);">
+                        {% if event.ticket_price and event.ticket_price > 0 %}
+                            GH₵ {{ event.ticket_price }}
+                        {% else %}
+                            {% with cheapest=event.ticket_tiers.all|dictsort:"price"|first %}
+                                {% if cheapest %}
+                                    {% if cheapest.price == 0 %}Free{% else %}GH₵ {{ cheapest.price }}{% endif %}
+                                {% else %}
+                                    {{ event.gate_fee|default:"Free" }}
+                                {% endif %}
+                            {% endwith %}
+                        {% endif %}
+                    </h2>
+                </div>
+                
+                <!-- Date & Time -->
+                <div class="info-row">
+                    <div class="icon-circle"><i class="bi bi-calendar-event"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Date & Time</h6>
+                        <p class="text-muted mb-0">{{ event.date|date:"l, F j, Y" }}</p>
+                        <p class="text-muted mb-0">{{ event.start_time|time:"g:i A" }} - {{ event.end_time|time:"g:i A" }}</p>
+                    </div>
+                </div>
+                
+                <!-- Location -->
+                <div class="info-row mb-4">
+                    <div class="icon-circle"><i class="bi bi-geo-alt"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Location</h6>
+                        <p class="text-muted mb-0">{{ event.venue }}</p>
+                        <p class="text-muted mb-0">{{ event.location }}</p>
+                    </div>
+                </div>
+
+                <!-- Available Tiers & Tables Preview -->
+                {% if event.ticket_tiers.all %}
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-2 text-muted small text-uppercase">Available Tiers & Tables</h6>
+                    <div class="list-group">
+                        {% for tier in event.ticket_tiers.all %}
+                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-3 border" style="border-radius: 8px; margin-bottom: 6px;">
+                            <div>
+                                <span class="fw-bold text-dark">{{ tier.name }}</span>
+                                {% if tier.description %}
+                                    <br><small class="text-muted" style="font-size: 0.75rem;">{{ tier.description|truncatechars:40 }}</small>
+                                {% endif %}
+                            </div>
+                            <span class="badge bg-success rounded-pill px-2 py-1">GH₵ {{ tier.price }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Booking Action -->
+                {% if event.status == 'Published' %}
+                    
+                    {% if event.is_free %}
+                        <!-- LOGIC FOR FREE EVENTS: Show Organizer Contact -->
+                        <div class="alert alert-success text-center border-0 mb-4" style="border-radius: 12px; background-color: rgba(37, 211, 102, 0.1); color: #075e54;">
+                            <i class="bi bi-tag-fill me-2"></i> <strong>Free Event / Pay at Gate</strong>
+                        </div>
+                        
+                        <a href="tel:{{ event.organizer.phone_number }}" class="btn btn-lg w-100 fw-bold shadow-sm mb-3" style="background-color: var(--accent-orange); color: #1A1A1A; border-radius: 12px; padding: 16px;">
+                            <i class="bi bi-telephone-fill me-2"></i> Call to Reserve
+                        </a>
+                        <a href="https://wa.me/233{{ event.organizer.phone_number|slice:'1:' }}" target="_blank" class="btn w-100 fw-bold" style="background-color: #25D366; color: white; border-radius: 12px; padding: 12px;">
+                            <i class="bi bi-whatsapp me-2"></i> WhatsApp Organizer
+                        </a>
+                        <small class="text-muted d-block text-center mt-3" style="font-size: 0.8rem;">
+                            Contact <strong>{{ event.organizer.organization_name }}</strong> directly for inquiries.
+                        </small>
+                        
+                    {% else %}
+                        <!-- LOGIC FOR PAID EVENTS: Show Buy Tickets Button -->
+                        <a href="{% url 'events:checkout' event.id %}" class="btn btn-lg w-100 fw-bold shadow-sm mb-2" style="background-color: var(--primary-green); color: white; border-radius: 12px; padding: 16px;">
+                            <i class="bi bi-ticket-perforated me-2"></i> Buy Tickets / Tables
+                        </a>
+                        <small class="text-muted d-block text-center mt-2" style="font-size: 0.8rem;">
+                            <i class="bi bi-shield-lock me-1"></i> Secure payment via Paystack
+                        </small>
+                    {% endif %}
+
+                {% else %}
+                    <div class="alert alert-secondary text-center fw-bold border-0" style="border-radius: 12px;">
+                        This event is currently {{ event.status }}.
+                    </div>
+                {% endif %}
+                
+            </div>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}
