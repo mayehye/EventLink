@@ -33,4 +33,11 @@ urlpatterns = [
     path('event/<int:event_id>/broadcast/', views.broadcast_message, name='broadcast_message'),
     path('event/<int:event_id>/announcements/', views.event_announcements, name='event_announcements'),
     path('event/<int:event_id>/export-csv/', views.export_attendees_csv, name='export_attendees_csv'),
+    # The page the user lands on
+    path('verify-payment/<str:reference>/', views.verify_payment, name='verify_payment'),
+    
+    # The API endpoint for polling
+    path('api/check-status/<str:reference>/', views.check_ticket_status, name='check_ticket_status'),
+]
+
 ]

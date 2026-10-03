@@ -943,10 +943,53 @@ def payment_webhook(request):
 
     return HttpResponseBadRequest("Invalid method")
 
+import logging
+from events . models import Ticket
+
+logger = logging.getLogger(__name__)
+
 def generate_ticket_task(reference):
-    # This runs independently of the webhook response
-    # 1. Query Supabase for the transaction using the reference
-    # 2. Update database status to "Paid"
-    # 3. Generate the ticket (QR code / PDF)
-    # 4. Send the confirmation email/SMS
-    pass
+    try:
+        # 1. Find the pending ticket using the Paystack reference
+        ticket = Ticket.objects.get(order_reference=reference)
+
+        # 2. Prevent double-processing if Paystack retries the webhook
+        if ticket.payment_status == 'Paid':
+            logger.info(f"Ticket for reference {reference} is already paid. Skipping.")
+            return
+
+        # 3. Update the payment status
+        ticket.payment_status = 'Paid'
+        
+        # 4. Save to database (This automatically triggers your custom save() 
+        # method to generate the TKT-XXXXXX ticket_id if it doesn't exist yet)
+        ticket.save()
+        
+        logger.info(f"Successfully verified payment and generated ticket {ticket.ticket_id} for {reference}")
+
+        # 5. (Next Step) Send confirmation email to ticket.guest_email or ticket.customer.email
+        # send_ticket_email(ticket)
+
+    except Ticket.DoesNotExist:
+        logger.error(f"Webhook received for unknown reference: {reference}")
+    except Exception as e:
+        logger.error(f"Fatal error processing ticket for {reference}: {str(e)}")
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from .models import Ticket
+
+# Renders the waiting page after Paystack redirects the user
+def verify_payment(request, reference):
+    return render(request, 'verify_payment.html', {'reference': reference})
+
+# The API endpoint the JavaScript will poll every 3 seconds
+def check_ticket_status(request, reference):
+    try:
+        ticket = Ticket.objects.get(order_reference=reference)
+        return JsonResponse({
+            'status': ticket.payment_status,
+            'ticket_id': ticket.ticket_id
+        })
+    except Ticket.DoesNotExist:
+        return JsonResponse({'error': 'Ticket not found'}, status=404)

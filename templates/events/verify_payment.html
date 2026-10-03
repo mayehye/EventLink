@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifying Payment...</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px; background-color: #f9f9f9; }
+        .spinner { 
+            border: 4px solid #e0e0e0; 
+            border-top: 4px solid #00c300; /* Paystack Green */
+            border-radius: 50%; 
+            width: 50px; 
+            height: 50px; 
+            animation: spin 1s linear infinite; 
+            margin: 20px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .btn { padding: 12px 24px; background: #00c300; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <!-- Loading State -->
+    <div id="processing-screen">
+        <h2>Processing your payment...</h2>
+        <div class="spinner"></div>
+        <p>Please wait while we generate your ticket. Do not close this page.</p>
+    </div>
+
+    <!-- Success State (Hidden by default) -->
+    <div id="success-screen" style="display: none;">
+        <h2 style="color: #00c300;">Payment Successful!</h2>
+        <p>Your Ticket ID is: <strong id="display-ticket-id"></strong></p>
+        <br><br>
+        <a id="view-ticket-btn" href="/" class="btn">Go to Homepage</a>
+    </div>
+
+    <script>
+        // Get the Paystack reference passed from the Django view
+        const reference = "{{ reference }}"; 
+        const statusUrl = `/api/check-status/${reference}/`;
+        
+        let attempts = 0;
+        const maxAttempts = 20; // Poll for a maximum of 60 seconds (20 * 3s)
+
+        const pollInterval = setInterval(() => {
+            fetch(statusUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'Paid') {
+                        // Stop polling! The webhook finished saving the ticket.
+                        clearInterval(pollInterval);
+                        
+                        // Hide the loading screen, show the success screen
+                        document.getElementById('processing-screen').style.display = 'none';
+                        document.getElementById('success-screen').style.display = 'block';
+                        
+                        // Display the generated ticket ID
+                        document.getElementById('display-ticket-id').innerText = data.ticket_id;
+                    }
+                })
+                .catch(error => console.error('Polling error:', error));
+
+            attempts++;
+            
+            // If it takes longer than 60 seconds, stop polling and show a message
+            if (attempts >= maxAttempts) {
+                clearInterval(pollInterval);
+                document.getElementById('processing-screen').innerHTML = 
+                    "<h2>Taking longer than expected</h2>" +
+                    "<p>Your payment is being processed in the background. We will email your ticket once confirmed.</p>";
+            }
+        }, 3000); // Wait 3 seconds between each check
+    </script>
+</body>
+</html>
