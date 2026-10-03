@@ -40,4 +40,3 @@ urlpatterns = [
     path('api/check-status/<str:reference>/', views.check_ticket_status, name='check_ticket_status'),
 ]
 
-]
