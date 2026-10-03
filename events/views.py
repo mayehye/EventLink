@@ -900,3 +900,53 @@ def export_attendees_csv(request, event_id):
     ])
 
   return response
+
+
+
+
+import json
+import hmac
+import hashlib
+import threading
+from django.http import HttpResponse, HttpResponseBadRequest
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+
+@csrf_exempt
+def payment_webhook(request):
+    if request.method == 'POST':
+        # 1. Verify the signature (Paystack example)
+        paystack_signature = request.headers.get('x-paystack-signature')
+        secret = settings.PAYSTACK_SECRET_KEY.encode('utf-8')
+        
+        computed_signature = hmac.new(
+            secret, 
+            request.body, 
+            hashlib.sha512
+        ).hexdigest()
+        
+        if paystack_signature != computed_signature:
+            return HttpResponseBadRequest("Invalid signature")
+            
+        # 2. Parse the JSON event data
+        payload = json.loads(request.body)
+        
+        if payload.get('event') == 'charge.success':
+            reference = payload['data']['reference']
+            
+            # 3. Hand off the heavy processing to a background thread
+            thread = threading.Thread(target=generate_ticket_task, args=(reference,))
+            thread.start()
+
+        # 4. Acknowledge fast
+        return HttpResponse(status=200)
+
+    return HttpResponseBadRequest("Invalid method")
+
+def generate_ticket_task(reference):
+    # This runs independently of the webhook response
+    # 1. Query Supabase for the transaction using the reference
+    # 2. Update database status to "Paid"
+    # 3. Generate the ticket (QR code / PDF)
+    # 4. Send the confirmation email/SMS
+    pass
