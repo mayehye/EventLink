@@ -981,9 +981,8 @@ from .models import Ticket
 
 # Renders the waiting page after Paystack redirects the user
 def verify_payment(request, reference):
-    return render(request, 'verify_payment.html', {'reference': reference})
+    return render(request, 'events/verify_payment.html', {'reference': reference})# The API endpoint the JavaScript will poll every 3 seconds
 
-# The API endpoint the JavaScript will poll every 3 seconds
 def check_ticket_status(request, reference):
     try:
         ticket = Ticket.objects.get(order_reference=reference)

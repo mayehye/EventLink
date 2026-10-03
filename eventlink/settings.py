@@ -49,10 +49,13 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'eventlink.urls'
 
+import os # Make sure this is at the top of your settings.py
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        # UPDATE THIS LINE:
+        'DIRS': [os.path.join(BASE_DIR, 'templates')], 
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
