@@ -38,13 +38,40 @@
                                 </div>
                             </div>
 
-                            {% if ticket.is_used %}
-                                <div class="mb-3 text-end">
-                                    <a href="{% url 'events:delete_ticket' ticket.ticket_id %}" class="btn btn-outline-danger btn-sm fw-bold" style="border-radius: 8px;" onclick="return confirm('Remove this scanned ticket from your history?');">
-                                        <i class="bi bi-trash3-fill me-1"></i> Remove Ticket
-                                    </a>
-                                </div>
-                            {% endif %}
+                           {% if ticket.is_used %}
+    <div class="mb-3 text-end">
+        <!-- Modal Trigger Button -->
+        <button type="button" class="btn btn-outline-danger btn-sm fw-bold" style="border-radius: 8px;" data-bs-toggle="modal" data-bs-target="#deleteTicketModal{{ ticket.ticket_id }}">
+            <i class="bi bi-trash3-fill me-1"></i> Remove Ticket
+        </button>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade text-start" id="deleteTicketModal{{ ticket.ticket_id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ ticket.ticket_id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow" style="border-radius: 16px; border: none;">
+                <div class="modal-body text-center p-5">
+                    <!-- Warning Icon -->
+                    <div class="d-inline-block bg-danger bg-opacity-10 text-danger rounded-circle p-3 mb-4">
+                        <i class="bi bi-exclamation-triangle-fill fs-1"></i>
+                    </div>
+                    
+                    <h4 class="fw-bold mb-3" id="deleteModalLabel{{ ticket.ticket_id }}">Remove Ticket?</h4>
+                    <p class="text-muted mb-4">
+                        Are you sure you want to remove your scanned ticket for <strong class="text-dark">{{ ticket.event.title }}</strong>? This action cannot be undone.
+                    </p>
+                    
+                    <div class="d-flex justify-content-center gap-3">
+                        <button type="button" class="btn btn-light fw-bold px-4" data-bs-dismiss="modal" style="border-radius: 8px;">Cancel</button>
+                        <a href="{% url 'events:delete_ticket' ticket.ticket_id %}" class="btn btn-danger fw-bold px-4" style="border-radius: 8px;">
+                            Yes, Remove
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
                             
                             <p class="text-muted mb-3"><i class="bi bi-geo-alt-fill me-1"></i> {{ ticket.event.location }}</p>
                             

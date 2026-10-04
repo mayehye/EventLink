@@ -16,7 +16,7 @@
             margin: 20px auto;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .btn { padding: 12px 24px; background: #00c300; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }
+        .btn { padding: 12px 24px; background: #00c300; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; }
     </style>
 </head>
 <body>
@@ -32,8 +32,10 @@
     <div id="success-screen" style="display: none;">
         <h2 style="color: #00c300;">Payment Successful!</h2>
         <p>Your Ticket ID is: <strong id="display-ticket-id"></strong></p>
-        <br><br>
-        <a id="view-ticket-btn" href="/" class="btn">Go to Homepage</a>
+        <br>
+        <p style="color: #666; font-size: 0.9em; margin-bottom: 25px;">Redirecting you to your tickets automatically...</p>
+        
+        <a id="view-ticket-btn" href="{% url 'events:my_tickets' %}" class="btn">View Ticket Now</a>
     </div>
 
     <script>
@@ -58,6 +60,11 @@
                         
                         // Display the generated ticket ID
                         document.getElementById('display-ticket-id').innerText = data.ticket_id;
+
+                        // Automatically redirect to the tickets page after 2.5 seconds
+                        setTimeout(() => { 
+                            window.location.href = "{% url 'events:my_tickets' %}"; 
+                        }, 2500);
                     }
                 })
                 .catch(error => console.error('Polling error:', error));
@@ -69,7 +76,8 @@
                 clearInterval(pollInterval);
                 document.getElementById('processing-screen').innerHTML = 
                     "<h2>Taking longer than expected</h2>" +
-                    "<p>Your payment is being processed in the background. We will email your ticket once confirmed.</p>";
+                    "<p>Your payment is being processed in the background. We will email your ticket once confirmed.</p><br>" + 
+                    "<a href=\"{% url 'events:my_tickets' %}\" class=\"btn\">Check My Tickets</a>";
             }
         }, 3000); // Wait 3 seconds between each check
     </script>
