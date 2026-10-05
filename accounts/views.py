@@ -74,7 +74,7 @@ def logout_user(request):
     return redirect('events:home')
 
 
-# ---------------- PAYOUT SETTINGS & WITHDRAWALS ----------------
+# ---------------- PAYOUT SETTINGS (CONNECT ACCOUNT ONLY) ----------------
 
 @login_required(login_url='/accounts/login/')
 def payout_settings(request):
@@ -82,73 +82,27 @@ def payout_settings(request):
     if not organizer:
         return redirect('events:home')
 
-    # 1. Calculate Total Earned: Sum total_price of paid tickets sold by this organizer
-    organizer_tickets = Ticket.objects.filter(
-        event__organizer=organizer
-    ).filter(
-        Q(payment_status__iexact='Paid') | Q(payment_status__iexact='success')
-    )
-    
-    gross_revenue = organizer_tickets.aggregate(total=Sum('total_price'))['total'] or Decimal('0.00')
-    
-    # Platform commission (e.g., 10% platform fee, organizer keeps 90%)
-    platform_commission_rate = Decimal('0.10')
-    total_earned = gross_revenue * (Decimal('1.00') - platform_commission_rate)
-
-    # 2. Fetch Payout Requests safely
-    payouts = PayoutRequest.objects.filter(organizer=organizer)
-    
-    pending_amount = payouts.filter(status__iexact='Pending').aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
-    paid_amount = payouts.filter(Q(status__iexact='Paid') | Q(status__iexact='Approved')).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
-
-    # 3. Available Balance = Total Earned - (Paid Withdrawals + Pending Withdrawals)
-    # This immediately deducts the balance upon clicking request withdrawal!
-    available_balance = total_earned - (paid_amount + pending_amount)
-    if available_balance < Decimal('0.00'):
-        available_balance = Decimal('0.00')
-
-    # 4. Handle Withdrawal Form Submission
     if request.method == 'POST':
-        try:
-            requested_amount = Decimal(request.POST.get('amount', '0'))
-        except (ValueError, InvalidOperation):
-            requested_amount = Decimal('0.00')
+        settlement_bank = request.POST.get('settlement_bank')
+        account_number = request.POST.get('account_number')
 
-        if requested_amount <= Decimal('0.00'):
-            messages.error(request, "Please enter a valid withdrawal amount.")
-        elif requested_amount > available_balance:
-            messages.error(request, f"Requested amount (GHS {requested_amount}) exceeds your available balance (GHS {available_balance}).")
+        if settlement_bank and account_number:
+            organizer.settlement_bank = settlement_bank
+            organizer.account_number = account_number
+            organizer.momo_network = settlement_bank 
+            organizer.momo_number = account_number
+            organizer.save()
+            
+            messages.success(request, "Payout account connected successfully!")
         else:
-            PayoutRequest.objects.create(
-                organizer=organizer,
-                amount=requested_amount,
-                status='Pending'
-            )
-            messages.success(request, f"Successfully requested withdrawal of GHS {requested_amount:.2f}. Pending admin review.")
-            return redirect('accounts:payout_settings')
+            messages.error(request, "Please select a bank/network and enter an account number.")
+            
+        return redirect('accounts:payout_settings')
 
-    context = {
-        'organizer': organizer,
-        'total_earned': total_earned,
-        'available_balance': available_balance,
-        'pending_amount': pending_amount,
-        'paid_amount': paid_amount,
-    }
-    return render(request, 'accounts/payout_settings.html', context)
+    return render(request, 'accounts/payout_settings.html', {'organizer': organizer})
 
-@login_required(login_url='/accounts/login/')
-def request_payout(request):
-    """Alias view for request_payout, routing directly to payout settings."""
-    return payout_settings(request)
 
-from decimal import Decimal, InvalidOperation
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.db.models import Sum, Q
-from django.conf import settings
-from .models import Organizer, PayoutRequest
-from events.models import Ticket
+# ---------------- WITHDRAW FUNDS (REQUEST PAYOUT ONLY) ----------------
 
 @login_required(login_url='/accounts/login/')
 def request_payout(request):
@@ -157,7 +111,7 @@ def request_payout(request):
         return redirect('events:home')
 
     # Check if organizer has Momo details set up
-    if not organizer.momo_number:
+    if not organizer.momo_number and not organizer.account_number:
         messages.error(request, "Please set up your payout MoMo details first.")
         return redirect('accounts:payout_settings')
 
@@ -197,8 +151,8 @@ def request_payout(request):
             PayoutRequest.objects.create(
                 organizer=organizer,
                 amount=requested_amount,
-                momo_number=organizer.momo_number,
-                momo_network=organizer.momo_network,
+                momo_number=organizer.momo_number or organizer.account_number,
+                momo_network=organizer.momo_network or organizer.settlement_bank,
                 status='Pending'
             )
             messages.success(request, f"Withdrawal request of GHS {requested_amount:.2f} submitted successfully! Admin will send funds shortly.")
@@ -214,34 +168,33 @@ def request_payout(request):
     return render(request, 'accounts/request_payout.html', context)
 
 # --- OLD PAYSTACK TRANSFER RECIPIENT API (Commented out) ---
-        # name = request.POST.get('business_name') or organizer.organization_name
-        # account_number = request.POST.get('account_number')
-        # bank_code = request.POST.get('settlement_bank')
-        # 
-        # url = "https://api.paystack.co/transferrecipient"
-        # headers = {
-        #     "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
-        #     "Content-Type": "application/json",
-        # }
-        # payload = {
-        #     "type": "mobile_money",
-        #     "name": name,
-        #     "account_number": account_number,
-        #     "bank_code": bank_code,
-        #     "currency": "GHS"
-        # }
-        # 
-        # response = requests.post(url, headers=headers, json=payload)
-        # res_data = response.json()
-        # 
-        # if res_data.get("status"):
-        #     organizer.paystack_recipient_code = res_data["data"]["recipient_code"]
-        #     organizer.save()
-        #     messages.success(request, "Payout account saved successfully!")
-        #     return redirect('accounts:payout_settings')
-        # else:
-        #     messages.error(request, f"Error: {res_data.get('message')}")
-
+#         name = request.POST.get('business_name') or organizer.organization_name
+#         account_number = request.POST.get('account_number')
+#         bank_code = request.POST.get('settlement_bank')
+#         
+#         url = "https://api.paystack.co/transferrecipient"
+#         headers = {
+#             "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
+#             "Content-Type": "application/json",
+#         }
+#         payload = {
+#             "type": "mobile_money",
+#             "name": name,
+#             "account_number": account_number,
+#             "bank_code": bank_code,
+#             "currency": "GHS"
+#         }
+#         
+#         response = requests.post(url, headers=headers, json=payload)
+#         res_data = response.json()
+#         
+#         if res_data.get("status"):
+#             organizer.paystack_recipient_code = res_data["data"]["recipient_code"]
+#             organizer.save()
+#             messages.success(request, "Payout account saved successfully!")
+#             return redirect('accounts:payout_settings')
+#         else:
+#             messages.error(request, f"Error: {res_data.get('message')}")
 
 
 @login_required
