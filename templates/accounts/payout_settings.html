@@ -24,15 +24,17 @@
                         {% endfor %}
                     {% endif %}
 
-                    {% if organizer.account_number or organizer.paystack_subaccount_code %}
+                    <!-- FIXED: Check momo_number instead of account_number -->
+                    {% if organizer.momo_number or organizer.paystack_subaccount_code %}
                         <div class="rounded-4 p-4 mb-4 text-white shadow-sm" style="background-color: var(--primary-green);">
                             <div class="d-flex align-items-center mb-2">
                                 <i class="bi bi-check-circle-fill fs-4 me-2"></i>
                                 <h5 class="fw-bold mb-0 text-white">Payout Account Connected</h5>
                             </div>
                             <ul class="list-unstyled small mb-0 opacity-90">
-                                <li class="py-1"><strong>Provider / Bank:</strong> <span class="badge bg-white text-dark">{{ organizer.settlement_bank|upper }}</span></li>
-                                <li class="py-1"><strong>Account-Number:</strong> <strong class="text-white">{{ organizer.account_number }}</strong></li>
+                                <!-- FIXED: Display momo_network and momo_number -->
+                                <li class="py-1"><strong>Provider / Bank:</strong> <span class="badge bg-white text-dark">{{ organizer.momo_network|upper }}</span></li>
+                                <li class="py-1"><strong>Account-Number:</strong> <strong class="text-white">{{ organizer.momo_number }}</strong></li>
                                 {% if organizer.paystack_subaccount_code %}
                                 <li class="py-1"><strong>Subaccount Code:</strong> <code class="text-white bg-dark bg-opacity-25 px-2 py-1 rounded">{{ organizer.paystack_subaccount_code }}</code></li>
                                 {% endif %}
@@ -43,20 +45,20 @@
                     <form method="POST" action="{% url 'accounts:payout_settings' %}">
                         {% csrf_token %}
                         
-                        <!-- Hidden input that actually submits the selected bank/network value -->
-                        <input type="hidden" name="settlement_bank" id="selectedBank" value="{{ organizer.settlement_bank|default:'' }}">
+                        <!-- FIXED: Value set to momo_network -->
+                        <input type="hidden" name="settlement_bank" id="selectedBank" value="{{ organizer.momo_network|default:'' }}">
 
                         <div class="mb-3 text-start">
                             <label for="settlement_bank" class="form-label fw-bold small text-muted text-uppercase">Bank Name / Mobile Money Provider</label>
                             
-                            <!-- Custom Bootstrap Dropdown -->
                             <div class="dropdown w-100">
                                 <button class="btn btn-white bg-white border shadow-sm dropdown-toggle fw-bold px-3 py-2 rounded-3 text-dark d-flex align-items-center justify-content-between w-100" type="button" id="bankDropdownButton" data-bs-toggle="dropdown" aria-expanded="false" style="min-height: 48px;">
                                     <span id="currentBankSelection">
-                                        {% if organizer.settlement_bank == 'MTN' %}🟡 MTN Mobile Money (Momo)
-                                        {% elif organizer.settlement_bank == 'VOD' %}🔴 Vodafone / Telecel Cash
-                                        {% elif organizer.settlement_bank == 'AIR' %}🔵 AirtelTigo Money
-                                        {% elif organizer.settlement_bank == 'BANK' %}🏦 Bank Account Transfer
+                                        <!-- FIXED: Check momo_network to keep dropdown selection visible after save -->
+                                        {% if organizer.momo_network == 'MTN' %}🟡 MTN Mobile Money (Momo)
+                                        {% elif organizer.momo_network == 'VOD' %}🔴 Vodafone / Telecel Cash
+                                        {% elif organizer.momo_network == 'AIR' %}🔵 AirtelTigo Money
+                                        {% elif organizer.momo_network == 'BANK' %}🏦 Bank Account Transfer
                                         {% else %}Select your bank or network{% endif %}
                                     </span>
                                 </button>
@@ -71,7 +73,8 @@
 
                         <div class="mb-4 text-start">
                             <label for="account_number" class="form-label fw-bold small text-muted text-uppercase">Account Number / Phone Number</label>
-                            <input type="text" class="form-control rounded-3 py-2 bg-white shadow-sm" id="account_number" name="account_number" value="{{ organizer.account_number|default:'' }}" placeholder="Enter account or mobile number" required>
+                            <!-- FIXED: Value set to momo_number so it doesn't clear out on refresh -->
+                            <input type="text" class="form-control rounded-3 py-2 bg-white shadow-sm" id="account_number" name="account_number" value="{{ organizer.momo_number|default:'' }}" placeholder="Enter account or mobile number" required>
                         </div>
 
                         <div class="d-grid gap-2">
@@ -103,10 +106,7 @@
                 const val = this.getAttribute('data-value');
                 const text = this.textContent;
 
-                // Update hidden input value
                 selectedBankInput.value = val;
-
-                // Update button text display
                 currentBankSelectionText.textContent = text;
             });
         });
