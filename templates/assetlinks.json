@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.eventlinkgh.twa",
+        "sha256_cert_fingerprints": ["F3:62:5F:31:C4:27:B5:B9:09:9D:FA:ED:09:C7:A7:25:D9:66:8F:81:39:42:A9:E8:05:C9:2C:DF:47:2E:BA:A8"]
+      }
+    }]
