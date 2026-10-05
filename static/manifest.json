@@ -1,0 +1,17 @@
+{
+  "name": "EventLink",
+  "short_name": "EventLink",
+  "description": "Discover, book, and enjoy events in Ghana.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#00c300",
+  "icons": [
+    {
+      "src": "images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
