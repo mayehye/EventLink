@@ -7,8 +7,8 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#ffffff",
-  "theme_color": "#00c300",
+  "background_color": "#F6F7F6",
+  "theme_color": "#0A4D3C",
   "categories": ["events", "entertainment", "lifestyle"],
   "icons": [
     {
@@ -22,6 +22,20 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/static/images/screenshot-1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://eventlinkgh.com/manifest.json"
     }
   ]
 }
