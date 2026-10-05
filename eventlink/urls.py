@@ -25,6 +25,14 @@ urlpatterns = [
     
     # 2. TWA Digital Asset Link URL
     path('.well-known/assetlinks.json', TemplateView.as_view(template_name="assetlinks.json", content_type='application/json'), name='assetlinks'),
+    # 1. PWA Service Worker URL
+    path('sw.js', TemplateView.as_view(template_name="sw.js", content_type='application/javascript'), name='sw.js'),
+    
+    # NEW: Offline Fallback URL
+    path('offline/', TemplateView.as_view(template_name="offline.html"), name='offline'),
+    
+    # 2. TWA Digital Asset Link URL
+    path('.well-known/assetlinks.json', TemplateView.as_view(template_name="assetlinks.json", content_type='application/json'), name='assetlinks'),
 
 ]
 

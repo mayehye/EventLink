@@ -1,0 +1,50 @@
+<!-- templates/offline.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>No Internet Connection</title>
+    <meta name="theme-color" content="#00c300">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F6F7F6;
+            color: #1A1A1A;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+            padding: 20px;
+        }
+        h2 { color: #0A4D3C; font-family: 'Merriweather', serif; }
+        p { color: #6C757D; }
+        .btn {
+            background-color: #0A4D3C;
+            color: white;
+            padding: 10px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#dc3545" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="1" y1="1" x2="23" y2="23"></line>
+        <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+        <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+        <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+        <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+        <line x1="12" y1="20" x2="12.01" y2="20"></line>
+    </svg>
+    <h2>You are offline</h2>
+    <p>Please check your internet connection and try again.</p>
+    <a href="/" class="btn" onclick="window.location.reload();">Try Again</a>
+</body>
+</html>
