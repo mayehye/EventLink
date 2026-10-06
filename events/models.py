@@ -65,7 +65,8 @@ class Ticket(models.Model):
     # SCANNER TRACKING
     is_used = models.BooleanField(default=False)
     scanned_at = models.DateTimeField(null=True, blank=True)
-
+    hidden_by_customer = models.BooleanField(default=False)
+    
     def save(self, *args, **kwargs):
         if not self.ticket_id:
             self.ticket_id = f"TKT-{uuid.uuid4().hex[:6].upper()}"
