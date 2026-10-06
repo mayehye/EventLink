@@ -82,9 +82,11 @@
     .category-scroll::-webkit-scrollbar {
         display: none;
     }
+    
+    /* 1. FIXED: Default Category Card adapts to Dark Mode */
     .category-card {
-        background: white;
-        border: 1px solid #e0e0e0;
+        background-color: var(--card-bg); 
+        border: 1px solid var(--border-color, #e0e0e0);
         border-radius: 30px;
         padding: 8px 24px;
         color: var(--text-dark);
@@ -93,17 +95,19 @@
         white-space: nowrap;
         transition: all 0.2s ease;
     }
+    
+    /* 2. FIXED: Hover state stays solid green with white text */
     .category-card:hover, .category-card.active {
-        background: var(--primary-green);
-        background-color: var(--card-bg); /* FIXED: This now listens to the dark mode toggle */
-        border-color: var(--primary-green);
+        background-color: var(--primary-green) !important;
+        border-color: var(--primary-green) !important;
+        color: #ffffff !important;
     }
     
    /* Event Card */
     .event-card {
         border: none;
         border-radius: 16px;
-        background-color: var(--card-bg); /* FIXED: This now listens to the dark mode toggle */
+        background-color: var(--card-bg); 
         box-shadow: 0 4px 15px rgba(0,0,0,0.04);
         transition: transform 0.2s;
         display: flex;
@@ -167,7 +171,6 @@
     .mini-rate {
         right: 15px;
         background-color: var(--primary-green);
-
     }
 
     .event-image-placeholder {
