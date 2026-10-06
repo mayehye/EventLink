@@ -49,7 +49,7 @@
         
         /* Dark Theme Overrides */
         [data-bs-theme="dark"] {
-            --primary-green: #00c300; /* Brighter green for better contrast in dark mode */
+            --primary-green: #00c300;
             --bg-light: #121212;
             --text-dark: #f8f9fa;
             --text-muted: #adb5bd;
@@ -74,15 +74,24 @@
             transition: background-color 0.3s ease;
         }
         
-        [data-bs-theme="dark"] .bg-white {
-            background-color: var(--nav-bg) !important;
-        }
-
+        /* --- FIXED: Force all cards and backgrounds to adapt to dark mode --- */
+        [data-bs-theme="dark"] .bg-white,
+        [data-bs-theme="dark"] .bg-light,
         [data-bs-theme="dark"] .card {
-            background-color: #1e1e1e !important;
+            background-color: var(--nav-bg) !important;
             border-color: #333 !important;
         }
 
+        /* --- FIXED: Force text colors to flip properly --- */
+        [data-bs-theme="dark"] .text-dark {
+            color: var(--text-dark) !important;
+        }
+
+        [data-bs-theme="dark"] .text-muted {
+            color: var(--text-muted) !important;
+        }
+        
+        /* Keep your existing navbar and button styles below here... */
         .navbar-custom .nav-link {
             color: var(--text-dark);
             font-weight: 500;
