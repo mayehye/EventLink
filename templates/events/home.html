@@ -83,7 +83,7 @@
         display: none;
     }
     
-    /* 1. FIXED: Default Category Card adapts to Dark Mode */
+    /* Default Category Card adapts to Dark Mode */
     .category-card {
         background-color: var(--card-bg); 
         border: 1px solid var(--border-color, #e0e0e0);
@@ -96,7 +96,7 @@
         transition: all 0.2s ease;
     }
     
-    /* 2. FIXED: Hover state stays solid green with white text */
+    /* Hover state stays solid green with white text */
     .category-card:hover, .category-card.active {
         background-color: var(--primary-green) !important;
         border-color: var(--primary-green) !important;
@@ -236,6 +236,15 @@
                         </div>
 
                         <span class="badge bg-danger text-white position-absolute top-0 start-0 m-3 fw-bold shadow-sm" style="z-index: 6; pointer-events: none;">Live Today</span>
+
+                        <!-- Native Share Button -->
+                        <button type="button" class="btn btn-light shadow-sm share-event-btn position-absolute top-0 end-0 m-2" 
+                                style="z-index: 10; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; pointer-events: auto;"
+                                data-title="{{ event.title }}" 
+                                data-url="{% url 'events:event_detail' event.id %}"
+                                title="Share Event">
+                            <i class="bi bi-share-fill" style="color: var(--primary-green);"></i>
+                        </button>
                     </div>
                     
                     <div class="card-body p-3 d-flex flex-column">
@@ -313,6 +322,15 @@
                         </div>
 
                         <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-3 fw-bold shadow-sm" style="z-index: 6; pointer-events: none;">Promoted</span>
+
+                        <!-- Native Share Button -->
+                        <button type="button" class="btn btn-light shadow-sm share-event-btn position-absolute top-0 end-0 m-2" 
+                                style="z-index: 10; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; pointer-events: auto;"
+                                data-title="{{ event.title }}" 
+                                data-url="{% url 'events:event_detail' event.id %}"
+                                title="Share Event">
+                            <i class="bi bi-share-fill" style="color: var(--primary-green);"></i>
+                        </button>
                     </div>
                     
                     <div class="card-body p-3 d-flex flex-column">
@@ -394,6 +412,15 @@
                             <span style="font-size: 0.6rem; text-transform: uppercase;">Rate</span>
                             <span style="font-size: 0.9rem; font-weight: 900;">{{ event.gate_fee|default:"Free" }}</span>
                         </div>
+
+                        <!-- Native Share Button -->
+                        <button type="button" class="btn btn-light shadow-sm share-event-btn position-absolute top-0 end-0 m-2" 
+                                style="z-index: 10; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; pointer-events: auto;"
+                                data-title="{{ event.title }}" 
+                                data-url="{% url 'events:event_detail' event.id %}"
+                                title="Share Event">
+                            <i class="bi bi-share-fill" style="color: var(--primary-green);"></i>
+                        </button>
                     </div>
                     
                     <div class="card-body p-4 d-flex flex-column">

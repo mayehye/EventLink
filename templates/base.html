@@ -297,5 +297,37 @@
             });
         });
     </script>
+
+    <!-- Native Web Share API Logic -->
+    <script>
+        document.addEventListener('click', async function(e) {
+            // Check if the clicked element or its parent is the share button
+            const shareBtn = e.target.closest('.share-event-btn');
+            
+            if (shareBtn) {
+                e.preventDefault();
+                const eventTitle = shareBtn.getAttribute('data-title');
+                // Construct the full absolute URL
+                const eventUrl = window.location.origin + shareBtn.getAttribute('data-url');
+                
+                if (navigator.share) {
+                    try {
+                        await navigator.share({
+                            title: eventTitle,
+                            text: `Check out this event: ${eventTitle} on EventLink!`,
+                            url: eventUrl
+                        });
+                    } catch (err) {
+                        console.log('Share canceled or failed:', err);
+                    }
+                } else {
+                    // Fallback for older desktop browsers: Copy to clipboard
+                    navigator.clipboard.writeText(eventUrl).then(() => {
+                        alert('Event link copied to clipboard!');
+                    });
+                }
+            }
+        });
+    </script>
 </body>
 </html>

@@ -52,14 +52,25 @@
         <div class="col-lg-4 col-md-6 mb-4">
             <div class="card border-0 shadow-sm h-100" style="border-radius: 16px; overflow: hidden;">
                 
-                <!-- Event Poster Thumbnail -->
-                {% if event.image %}
-                    <img src="{{ event.image.url }}" alt="Event Poster" class="card-img-top" style="height: 180px; object-fit: cover;">
-                {% else %}
-                    <div class="bg-light d-flex align-items-center justify-content-center text-muted" style="height: 180px;">
-                        <i class="bi bi-image fs-1"></i>
-                    </div>
-                {% endif %}
+                <!-- Event Poster Thumbnail with Relative Wrapper for Share Button -->
+                <div class="position-relative">
+                    {% if event.image %}
+                        <img src="{{ event.image.url }}" alt="Event Poster" class="card-img-top" style="height: 180px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-light d-flex align-items-center justify-content-center text-muted" style="height: 180px;">
+                            <i class="bi bi-image fs-1"></i>
+                        </div>
+                    {% endif %}
+
+                    <!-- Native Share Button (Floated Top Right) -->
+                    <button type="button" class="btn btn-light shadow-sm share-event-btn position-absolute top-0 end-0 m-2" 
+                            style="z-index: 10; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; pointer-events: auto;"
+                            data-title="{{ event.title }}" 
+                            data-url="{% url 'events:event_detail' event.id %}"
+                            title="Share Event">
+                        <i class="bi bi-share-fill" style="color: var(--primary-green);"></i>
+                    </button>
+                </div>
 
                 <div class="card-body p-4 d-flex flex-column">
                     <h4 class="fw-bold mb-2">{{ event.title }}</h4>
@@ -153,7 +164,7 @@
                 <a href="mailto:{{ admin_email }}" class="btn text-white btn-sm fw-bold px-3 py-2 shadow-sm" style="background-color: var(--primary-green); border-radius: 8px;">
                     <i class="bi bi-envelope-fill me-1"></i> Email Admin
                 </a>
-                <a href="https://wa.me/{{ +233554113254 }}?text=Hello%20Admin,%20I%20would%20like%20to%20verify%20my%20EventLink%20organizer%20account." target="_blank" class="btn btn-sm text-white fw-bold px-3 py-2 shadow-sm" style="background-color: var(--primary-green); border-radius: 8px;">
+                <a href="https://wa.me/233554113254?text=Hello%20Admin,%20I%20would%20like%20to%20verify%20my%20EventLink%20organizer%20account." target="_blank" class="btn btn-sm text-white fw-bold px-3 py-2 shadow-sm" style="background-color: var(--primary-green); border-radius: 8px;">
                     <i class="bi bi-whatsapp me-1"></i> WhatsApp Admin
                 </a>
             </div>
