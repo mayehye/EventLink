@@ -9,7 +9,7 @@
     </script>
 
     <!-- PWA Meta Tags (Dynamic theme color is handled in JS below) -->
-    <meta name="theme-color" content="#F6F7F6" id="pwa-theme-color">
+    <meta name="theme-color" content="#ffffff" id="pwa-theme-color">
     <link rel="manifest" href="{% static 'manifest.json' %}">
 
     <!-- Service Worker Registration -->
@@ -45,15 +45,19 @@
             --text-dark: #1A1A1A;
             --text-muted: #6C757D;
             --nav-bg: #ffffff;
+            --card-bg: #ffffff;
+            --border-color: #e9ecef;
         }
         
-        /* Dark Theme Overrides */
+        /* EXACT DARK MODE MATCH OVERRIDES */
         [data-bs-theme="dark"] {
-            --primary-green: #00c300;
-            --bg-light: #121212;
-            --text-dark: #f8f9fa;
-            --text-muted: #adb5bd;
-            --nav-bg: #1e1e1e;
+            --primary-green: #00c300; 
+            --bg-light: #121212;      /* Deep dark app background */
+            --text-dark: #ffffff;     /* Bright white for main text */
+            --text-muted: #a0a0a0;    /* Light grey for icons and secondary text */
+            --nav-bg: #1a1a1a;        /* Slightly elevated dark navbar */
+            --card-bg: #1a1a1a;       /* Event Card background matches navbar */
+            --border-color: #2d2d2d;  /* Very subtle dark borders */
         }
         
         body {
@@ -74,15 +78,15 @@
             transition: background-color 0.3s ease;
         }
         
-        /* --- FIXED: Force all cards and backgrounds to adapt to dark mode --- */
+        /* --- FORCE CARDS & BACKGROUNDS TO MATCH SCREENSHOT --- */
         [data-bs-theme="dark"] .bg-white,
         [data-bs-theme="dark"] .bg-light,
         [data-bs-theme="dark"] .card {
-            background-color: var(--nav-bg) !important;
-            border-color: #333 !important;
+            background-color: var(--card-bg) !important;
+            border: 1px solid var(--border-color) !important;
         }
 
-        /* --- FIXED: Force text colors to flip properly --- */
+        /* --- FORCE TEXT COLORS TO POP --- */
         [data-bs-theme="dark"] .text-dark {
             color: var(--text-dark) !important;
         }
@@ -90,8 +94,33 @@
         [data-bs-theme="dark"] .text-muted {
             color: var(--text-muted) !important;
         }
+
+        /* --- MATCH THE EVENT BADGES OUTLINE --- */
+        [data-bs-theme="dark"] .badge.bg-light,
+        [data-bs-theme="dark"] .badge.bg-secondary,
+        [data-bs-theme="dark"] .badge.text-dark {
+            background-color: transparent !important;
+            color: #d0d0d0 !important;
+            border: 1px solid #404040 !important;
+        }
+
+        /* --- MATCH THE "BUY TICKET" BUTTON LOOK --- */
+        [data-bs-theme="dark"] .card .btn-light,
+        [data-bs-theme="dark"] .card .btn-outline-dark {
+            background-color: transparent !important;
+            border: 1px solid #333 !important;
+            color: #8be88b !important; /* Pale green text */
+            transition: all 0.2s ease;
+        }
         
-        /* Keep your existing navbar and button styles below here... */
+        [data-bs-theme="dark"] .card .btn-light:hover,
+        [data-bs-theme="dark"] .card .btn-outline-dark:hover {
+            border-color: var(--primary-green) !important;
+            color: var(--primary-green) !important;
+            background-color: rgba(0, 195, 0, 0.05) !important;
+        }
+
+        /* --- NAVBAR LINKS --- */
         .navbar-custom .nav-link {
             color: var(--text-dark);
             font-weight: 500;
@@ -101,6 +130,8 @@
         .navbar-custom .nav-link:hover {
             color: var(--primary-green);
         }
+        
+        /* Main solid green buttons (like Login/Signup) */
         .btn-custom {
             background-color: var(--primary-green);
             color: white;
@@ -226,7 +257,7 @@
             // Function to update the PWA status bar color
             const updateMobileStatusBar = (theme) => {
                 if (theme === 'dark') {
-                    pwaThemeMeta.setAttribute('content', '#1e1e1e'); // Dark mode navbar color
+                    pwaThemeMeta.setAttribute('content', '#1a1a1a'); // Dark mode navbar color
                 } else {
                     pwaThemeMeta.setAttribute('content', '#ffffff'); // Light mode navbar color
                 }
