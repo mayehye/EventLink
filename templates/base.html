@@ -163,6 +163,15 @@
         #themeToggle:focus {
             outline: none;
         }
+
+        /* Admin Report Link Hover */
+        .admin-report-link {
+            color: var(--text-muted);
+            transition: color 0.2s ease;
+        }
+        .admin-report-link:hover {
+            color: #dc3545 !important;
+        }
     </style>
 </head>
 <body>
@@ -237,6 +246,15 @@
             </div>
         </div>
     </nav>
+
+    <!-- Admin Support / Report Icon Bar (Directly Under Nav) -->
+    <div class="container-fluid border-bottom py-1 shadow-sm" style="background-color: var(--card-bg); border-color: var(--border-color);">
+        <div class="container d-flex justify-content-end">
+            <a href="https://wa.me/233554113254?text=Hello%20EventLink%20Admin,%20I%20need%20help%20or%20would%20like%20to%20report%20an%20issue." target="_blank" class="text-decoration-none small fw-bold d-flex align-items-center admin-report-link">
+                <i class="bi bi-shield-exclamation text-danger me-1 fs-6"></i> Report to Admin
+            </a>
+        </div>
+    </div>
 
     <main>
         {% block content %}

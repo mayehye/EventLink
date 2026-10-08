@@ -7,29 +7,35 @@
         box-shadow: 0 10px 40px rgba(0,0,0,0.06);
         border: none;
         overflow: hidden;
+        background-color: var(--card-bg);
     }
     .form-control-custom {
-        background-color: #F8F9FA;
-        border: 2px solid transparent;
+        background-color: var(--bg-light); /* FIXED: Adapts to theme */
+        border: 2px solid var(--border-color);
         border-radius: 12px;
         padding: 14px 20px;
+        color: var(--text-dark);
         transition: all 0.3s ease;
         font-size: 1rem;
     }
     .form-control-custom:focus {
-        background-color: white;
+        background-color: var(--bg-light); 
         border-color: var(--primary-green);
+        color: var(--text-dark);
         box-shadow: 0 0 0 4px rgba(10, 77, 60, 0.1);
         outline: none;
     }
+    .form-control-custom::placeholder {
+        color: var(--text-muted);
+    }
     .form-label-custom {
         font-weight: 600;
-        color: #333;
+        color: var(--text-dark);
         margin-bottom: 8px;
         font-size: 0.95rem;
     }
     .step-badge {
-        background-color: #E8F5E9;
+        background-color: rgba(10, 77, 60, 0.15); /* Light green tint that works in dark mode */
         color: var(--primary-green);
         width: 30px;
         height: 30px;
@@ -52,13 +58,22 @@
         </div>
         
         <div class="p-4 p-md-5">
+            
+            <!-- Customer Banner -->
+            <div class="alert mb-4 text-center" style="background-color: rgba(10, 77, 60, 0.08); border-radius: 12px; border: 1px solid rgba(10, 77, 60, 0.1);">
+                <span class="text-dark me-2" style="color: var(--text-dark) !important;">Just looking to buy tickets?</span> 
+                <a href="{% url 'accounts:register' %}" class="fw-bold text-decoration-none" style="color: var(--primary-green);">
+                    Sign up as a Customer <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+
             <form method="POST">
                 {% csrf_token %}
                 
                 <!-- Account Details Section -->
                 <div class="d-flex align-items-center mb-4">
                     <span class="step-badge">1</span>
-                    <h5 class="fw-bold mb-0">Account Details</h5>
+                    <h5 class="fw-bold mb-0 text-dark">Account Details</h5>
                 </div>
                 
                 <div class="row g-3 mb-5">
@@ -73,8 +88,6 @@
                             {% for error in field.errors %}
                                 <small class="text-danger fw-bold d-block mt-2"><i class="bi bi-exclamation-circle"></i> {{ error }}</small>
                             {% endfor %}
-                            
-                            <!-- Intentionally leaving out field.help_text to keep the UI clean! -->
                         </div>
                     {% endfor %}
                 </div>
@@ -82,7 +95,7 @@
                 <!-- Brand Details Section -->
                 <div class="d-flex align-items-center mb-4">
                     <span class="step-badge">2</span>
-                    <h5 class="fw-bold mb-0">Brand & Contact</h5>
+                    <h5 class="fw-bold mb-0 text-dark">Brand & Contact</h5>
                 </div>
                 
                 <div class="mb-4">
@@ -100,28 +113,16 @@
                            maxlength="15">
                 </div>
                 
-                <button type="submit" class="btn btn-lg w-100 fw-bold shadow-sm py-3" style="background-color: var(--accent-orange); color: #1A1A1A; border-radius: 12px; font-size: 1.1rem;">
+                <button type="submit" class="btn btn-lg w-100 fw-bold shadow-sm py-3" style="background-color: var(--primary-green); color: #ffffff; border-radius: 12px; font-size: 1.1rem;">
                     Create My Account
                 </button>
             </form>
             
-            <div class="text-center mt-4 pt-4 border-top">
+            <div class="text-center mt-4 pt-4 border-top" style="border-color: var(--border-color) !important;">
                 <span class="text-muted">Already have an account?</span> 
                 <a href="{% url 'accounts:login' %}" class="fw-bold text-decoration-none" style="color: var(--primary-green);">Log In</a>
             </div>
         </div>
-
-        <div class="p-4 p-md-5">
-            
-            <!-- ADD THIS BANNER -->
-            <div class="alert mb-4 text-center" style="background-color: rgba(10, 77, 60, 0.08); border-radius: 12px; border: 1px solid rgba(10, 77, 60, 0.1);">
-                <span class="text-dark me-2">Just looking to buy tickets?</span> 
-                <a href="{% url 'accounts:register' %}" class="fw-bold text-decoration-none" style="color: var(--primary-green);">
-                    Sign up as a Customer <i class="bi bi-arrow-right ms-1"></i>
-                </a>
-            </div>
-            
-            <form method="POST">
 
     </div>
 </div>

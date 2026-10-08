@@ -7,24 +7,30 @@
         box-shadow: 0 10px 40px rgba(0,0,0,0.06);
         border: none;
         overflow: hidden;
+        background-color: var(--card-bg);
     }
     .form-control-custom {
-        background-color: #F8F9FA;
-        border: 2px solid transparent;
+        background-color: var(--bg-light);
+        border: 2px solid var(--border-color);
         border-radius: 12px;
         padding: 14px 20px;
+        color: var(--text-dark);
         transition: all 0.3s ease;
         font-size: 1rem;
     }
     .form-control-custom:focus {
-        background-color: white;
+        background-color: var(--bg-light);
         border-color: var(--primary-green);
+        color: var(--text-dark);
         box-shadow: 0 0 0 4px rgba(10, 77, 60, 0.1);
         outline: none;
     }
+    .form-control-custom::placeholder {
+        color: var(--text-muted);
+    }
     .form-label-custom {
         font-weight: 600;
-        color: #333;
+        color: var(--text-dark);
         margin-bottom: 8px;
         font-size: 0.95rem;
     }
@@ -34,16 +40,16 @@
     <div class="card custom-card w-100" style="max-width: 550px;">
         
         <!-- Header -->
-        <div class="text-center p-5" style="background-color: #F8F9FA; border-bottom: 1px solid #EAEAEA;">
+        <div class="text-center p-5" style="background-color: var(--bg-light); border-bottom: 1px solid var(--border-color);">
             <h2 class="fw-bold mb-2" style="font-family: 'Merriweather', serif; color: var(--primary-green);">Create an Account</h2>
-            <p class="mb-0 text-muted">Sign up to buy tickets and save your favorite events.</p>
+            <p class="mb-0" style="color: var(--text-muted);">Sign up to buy tickets and save your favorite events.</p>
         </div>
         
         <div class="p-4 p-md-5">
             
             <!-- THE "SELL TICKETS" TOGGLE -->
             <div class="alert mb-4 text-center" style="background-color: rgba(255, 179, 0, 0.15); border-radius: 12px; border: 1px solid rgba(255, 179, 0, 0.3);">
-                <span class="text-dark me-2">Want to sell tickets?</span> 
+                <span class="me-2" style="color: var(--text-dark) !important;">Want to sell tickets?</span> 
                 <a href="{% url 'accounts:register_organizer' %}" class="fw-bold text-decoration-none" style="color: #b37d00;">
                     Become an Organizer <i class="bi bi-arrow-right ms-1"></i>
                 </a>
@@ -70,7 +76,7 @@
                 </button>
             </form>
             
-            <div class="text-center mt-4 pt-4 border-top">
+            <div class="text-center mt-4 pt-4 border-top" style="border-color: var(--border-color) !important;">
                 <span class="text-muted">Already have an account?</span> 
                 <a href="{% url 'accounts:login' %}" class="fw-bold text-decoration-none" style="color: var(--primary-green);">Log In</a>
             </div>
